@@ -6,7 +6,7 @@
 <title>BetWarrior — AML Brasil · Armado de Legajos</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
@@ -1227,45 +1227,62 @@ async function parseDetalle(input) {
   const file = input.files[0]; if (!file) return;
   addFileItem('list-detalle', file.name); input.value='';
   try {
+    // Read with cellDates:true so Date objects come through properly
     const wb = await readWorkbook(file);
-    // Use raw:true to get raw values, then handle dates manually
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:null, raw:true});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    // Use raw:false so dates are formatted strings, easier to parse
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
 
     const monthly = {};
     let parsed = 0;
+    let skipped = 0;
 
     rows.forEach(r => {
       const dateVal = r['Date'];
       if (!dateVal) return;
 
       let d = null;
+      const s = String(dateVal).trim();
 
-      if (typeof dateVal === 'number') {
-        // Excel serial date number → JS Date
-        d = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
-      } else if (dateVal instanceof Date) {
-        d = dateVal;
-      } else if (typeof dateVal === 'string' && dateVal.trim()) {
-        // Try ISO string yyyy-MM-dd or dd/MM/yyyy
-        const s = dateVal.trim();
-        if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-          d = new Date(s.substring(0, 10));
-        } else if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
-          const [dd, mm, yyyy] = s.split('/');
-          d = new Date(`${yyyy}-${mm}-${dd}`);
-        } else {
-          d = new Date(s);
-        }
+      // Try all common formats
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+        // ISO: 2026-03-30
+        d = new Date(s.substring(0, 10) + 'T12:00:00');
+      } else if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+        // BR: 30/03/2026
+        const [dd, mm, yyyy] = s.split('/');
+        d = new Date(`${yyyy}-${mm}-${dd}T12:00:00`);
+      } else if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
+        // US: 3/30/2026
+        const parts = s.split('/');
+        d = new Date(`${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}T12:00:00`);
+      } else if (!isNaN(Number(s)) && Number(s) > 40000) {
+        // Excel serial number fallback
+        const serial = Number(s);
+        d = new Date(Math.round((serial - 25569) * 86400 * 1000));
       }
 
-      if (!d || isNaN(d.getTime())) return;
+      if (!d || isNaN(d.getTime())) { skipped++; return; }
 
-      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;
-      if (!monthly[key]) monthly[key]={dep:0,ret:0};
-      monthly[key].dep += parseFloat(r['Deposit Local Curr']||0)||0;
-      monthly[key].ret += parseFloat(r['Withdrawal Local Curr']||0)||0;
+      const yr = d.getFullYear();
+      const mo = d.getMonth() + 1;
+      // Sanity check: year should be reasonable
+      if (yr < 2020 || yr > 2030) { skipped++; return; }
+
+      const key = `${yr}-${String(mo).padStart(2,'0')}`;
+      if (!monthly[key]) monthly[key] = {dep:0, ret:0};
+      const dep = parseFloat(String(r['Deposit Local Curr']||'0').replace(',','.')) || 0;
+      const ret = parseFloat(String(r['Withdrawal Local Curr']||'0').replace(',','.')) || 0;
+      monthly[key].dep += dep;
+      monthly[key].ret += ret;
       parsed++;
     });
+
+    if (parsed === 0) {
+      showParseWarn('detalle-parsed-ok','detalle-parsed-msg',
+        `Arquivo lido mas nenhuma transação reconhecida (${rows.length} linhas, ${skipped} ignoradas). Exemplo de data lida: "${rows[0]?.Date}"`);
+      return;
+    }
 
     window.monthTableData = monthly;
     buildMonthTableFromData(monthly);
