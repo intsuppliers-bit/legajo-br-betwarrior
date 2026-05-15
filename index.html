@@ -1236,67 +1236,56 @@ async function parseDetalle(input) {
   const file = input.files[0]; if (!file) return;
   addFileItem('list-detalle', file.name); input.value='';
   try {
-    // Read with cellDates:true → Date objects come through for properly formatted cells
-    // For cells stored as raw serials (no date format applied), we handle them manually
+    // Read with cellDates:true so Date objects come through properly
     const wb = await readWorkbook(file);
     const ws = wb.Sheets[wb.SheetNames[0]];
-    // raw:true preserves numbers as-is; cellDates:true in readWorkbook handles real date cells
-    const rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:true});
+    // Use raw:false so dates are formatted strings, easier to parse
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
 
     const monthly = {};
     let parsed = 0;
     let skipped = 0;
 
     rows.forEach(r => {
-      // Skip total/summary rows: must have a numeric PARTYID
-      const pid = r['PARTYID'];
-      if (!pid || isNaN(Number(pid))) return;
+      // Ignorar filas de total/resumo — PARTYID deve ser numérico
+      const pid = String(r['PARTYID']||'').trim();
+      if (!pid || !/^\d+$/.test(pid)) return;
 
       const dateVal = r['Date'];
       if (!dateVal) return;
 
       let d = null;
+      const s = String(dateVal).trim();
 
-      if (dateVal instanceof Date) {
-        // SheetJS already converted it (cellDates:true worked)
-        d = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate(), 12);
-      } else {
-        const s = String(dateVal).trim();
-        if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-          // ISO: 2026-03-30
-          d = new Date(s.substring(0, 10) + 'T12:00:00');
-        } else if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
-          // BR: 30/03/2026
-          const [dd, mm, yyyy] = s.split('/');
-          d = new Date(`${yyyy}-${mm}-${dd}T12:00:00`);
-        } else if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
-          // US: 3/30/2026
-          const parts = s.split('/');
-          d = new Date(`${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}T12:00:00`);
-        } else if (!isNaN(Number(s)) && Number(s) > 40000) {
-          // Raw Excel serial — convert using local date to avoid UTC timezone shift
-          const serial = Number(s);
-          const excelEpoch = new Date(1899, 11, 30);
-          d = new Date(excelEpoch.getTime() + serial * 86400000);
-          d = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12);
-        }
+      // Try all common formats
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+        // ISO: 2026-03-30
+        d = new Date(s.substring(0, 10) + 'T12:00:00');
+      } else if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+        // BR: 30/03/2026
+        const [dd, mm, yyyy] = s.split('/');
+        d = new Date(`${yyyy}-${mm}-${dd}T12:00:00`);
+      } else if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
+        // US: 3/30/2026
+        const parts = s.split('/');
+        d = new Date(`${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}T12:00:00`);
+      } else if (!isNaN(Number(s)) && Number(s) > 40000) {
+        // Excel serial number fallback
+        const serial = Number(s);
+        d = new Date(Math.round((serial - 25569) * 86400 * 1000));
       }
 
       if (!d || isNaN(d.getTime())) { skipped++; return; }
 
       const yr = d.getFullYear();
       const mo = d.getMonth() + 1;
-      if (yr < 2018 || yr > 2035) { skipped++; return; }
+      // Sanity check: year should be reasonable
+      if (yr < 2020 || yr > 2030) { skipped++; return; }
 
       const key = `${yr}-${String(mo).padStart(2,'0')}`;
       if (!monthly[key]) monthly[key] = {dep:0, ret:0};
-      // Parse numeric values — raw:true gives numbers directly, fallback for text
-      const dep = (typeof r['Deposit Local Curr'] === 'number')
-        ? r['Deposit Local Curr']
-        : parseFloat(String(r['Deposit Local Curr']||'0').replace(',','.')) || 0;
-      const ret = (typeof r['Withdrawal Local Curr'] === 'number')
-        ? r['Withdrawal Local Curr']
-        : parseFloat(String(r['Withdrawal Local Curr']||'0').replace(',','.')) || 0;
+      const dep = parseFloat(String(r['Deposit Local Curr']||'0').replace(/[^0-9.-]/g,'')) || 0;
+      const ret = parseFloat(String(r['Withdrawal Local Curr']||'0').replace(/[^0-9.-]/g,'')) || 0;
       monthly[key].dep += dep;
       monthly[key].ret += ret;
       parsed++;
