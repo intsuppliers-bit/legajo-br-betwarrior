@@ -1015,7 +1015,7 @@ Foram realizadas buscas utilizando o nome completo do cliente nas seguintes base
 
 Diante desse cenário, considerando a materialidade das movimentações, a ausência de resposta à solicitação de esclarecimentos e a incompatibilidade entre o perfil econômico declarado e o comportamento transacional observado, identifica-se possível indício de incompatibilidade econômico-financeira, razão pela qual recomenda-se o reporte das operações como suspeitas (ROS), em conformidade com a Portaria SPA/MF nº 1.143/2024 e demais normativos aplicáveis.
 
-Em [DATA_ALERTA_INTERNO], o cliente ultrapassou os limites internos estabelecidos para monitoramento de risco. A análise correspondente foi realizada e decidiu-se pelo encaminhamento para reporte, tendo o responsável de AML sido informado. Posteriormente, em [DATA_FIM], o Supervisor revisou o arquivo e aprovou o prosseguimento da revisão do cliente.`,
+Em [DATA_ALERTA_INTERNO], o cliente ultrapassou os limites internos estabelecidos para monitoramento de risco. A análise correspondente foi realizada e decidiu-se pelo encaminhamento para reporte, tendo o responsável de AML sido informado. Posteriormente, em [DATA_RELATORIO], o Supervisor revisou o arquivo e aprovou o prosseguimento da revisão do cliente.`,
 
   ros_ap_prem: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente, não tendo sido identificadas contas duplicadas, vinculadas ou indícios de utilização de terceiros para a realização de transações.
 
@@ -1031,7 +1031,7 @@ Foram realizadas buscas utilizando o nome completo do cliente nas seguintes base
 
 Não obstante a ausência de indícios concretos de irregularidade sob o ponto de vista transacional, a inconsistência entre o perfil econômico declarado, o volume financeiro movimentado e a impossibilidade de validação independente da atividade profissional informada configuram situação que requer comunicação, conforme os critérios estabelecidos pela normativa vigente. Dessa forma, o caso será reportado como operação suspeita (ROS), em conformidade com o disposto na Portaria SPA/MF nº 1.143/2024, em cumprimento às obrigações regulatórias do operador.
 
-O cliente superou o limiar interno correspondente ao nível de risco [NIVEL_RISCO]. A análise correspondente foi realizada e decidiu-se pelo encaminhamento para reporte complementar, tendo o responsável de AML sido informado. Posteriormente em [DATA_FIM], o Supervisor revisou o arquivo e aprovou o prosseguimento da revisão do cliente.`,
+O cliente superou o limiar interno correspondente ao nível de risco [NIVEL_RISCO]. A análise correspondente foi realizada e decidiu-se pelo encaminhamento para reporte complementar, tendo o responsável de AML sido informado. Posteriormente, em [DATA_RELATORIO], o Supervisor revisou o arquivo e aprovou o prosseguimento da revisão do cliente.`,
 
   ros_no_resp: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente, não tendo sido identificadas contas duplicadas, vinculadas ou indícios de utilização de terceiros para a realização de transações.
 
@@ -1047,7 +1047,7 @@ Adicionalmente, cabe destacar que, em [DATA_INICIO], o cliente superou o limiar 
 
 Dessa forma, ainda que a movimentação não apresente indícios concretos de lavagem de dinheiro ou financiamento do terrorismo sob o ponto de vista exclusivamente transacional, o caso será reportado conforme os critérios previstos na Portaria SPA/MF nº 1.143/2024, em cumprimento às obrigações do operador, em razão da ausência de resposta e da impossibilidade de validação das informações essenciais do cliente.
 
-A informação apresentada neste informe foi inicialmente revisada pelo analista responsável, que conduziu o processo conforme descrito nas seções precedentes. Posteriormente, o material foi avaliado pelo responsável de AML. Por fim, em [DATA_FIM], o Supervisor realizou a revisão integral do expediente e aprovou a continuidade do procedimento correspondente.`,
+A informação apresentada neste informe foi inicialmente revisada pelo analista responsável, que conduziu o processo conforme descrito nas seções precedentes. Posteriormente, o material foi avaliado pelo responsável de AML. Por fim, em [DATA_RELATORIO], o Supervisor realizou a revisão integral do expediente e aprovou a continuidade do procedimento correspondente.`,
 
   no_ros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente.
 
@@ -1427,8 +1427,9 @@ function substituteFields(texto) {
     const val = v(id);
     if (!val) return null;
     try {
-      const [y,m,d] = val.split('-');
-      return `${d}/${m}/${y}`;
+      const parts = val.split('-'); let [y,m,d] = parts;
+      let yr = parseInt(y); if(yr < 100) yr += 2000; else if(yr < 2000) yr += 2000;
+      return `${d}/${m}/${yr}`;
     } catch { return val; }
   };
   const fmtNum = (id) => {
@@ -1458,6 +1459,7 @@ function substituteFields(texto) {
     .replace(/\[FONTE_FUNDOS\]/g, v('fonte_fundos') || '[FONTE_FUNDOS]')
     .replace(/\[NIVEL_RISCO\]/g, (v('nivel_risco')||'[RISCO]').toLowerCase())
     .replace(/\[DATA_PRIMEIRO_DEP\]/g, fmt('data_primeiro_dep') || '[DATA_PRIMEIRO_DEP]')
+    .replace(/\[DATA_RELATORIO\]/g, fmt('data_relatorio') || '[DATA_RELATORIO]')
     .replace(/\[DATA_INICIO\]/g, fmt('data_inicio') || '[DATA_INICIO]')
     .replace(/\[DATA_FIM\]/g, fmt('data_fim') || '[DATA_FIM]')
     .replace(/\[DATA_ALERTA_INTERNO\]/g, fmt('data_inicio') || '[DATA_ALERTA]');
@@ -1467,7 +1469,7 @@ function substituteFields(texto) {
 function resubstituteNarrative() {
   const ta = document.getElementById('texto_narrativo');
   if (!ta || !ta.value) return;
-  const fmt = id => { const el=document.getElementById(id); if(!el||!el.value) return null; try{const[yr,m,d]=el.value.split('-');return`${d}/${m}/${yr}`;}catch{return null;} };
+  const fmt = id => { const el=document.getElementById(id); if(!el||!el.value) return null; try{const parts=el.value.split('-'); let yr=parseInt(parts[0]),m=parts[1],d=parts[2]; if(yr<100) yr+=2000; else if(yr<2000) yr+=2000; return`${d}/${m}/${yr}`;}catch{return null;} };
   const inicio = fmt('data_inicio');
   const fim = fmt('data_fim');
   const primDep = fmt('data_primeiro_dep');
@@ -1479,6 +1481,7 @@ function resubstituteNarrative() {
   const retTot = vv('ret_total'); if (retTot) { const n=parseFloat(retTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[RET_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const apTot = vv('apostas_total'); if (apTot) { const n=parseFloat(apTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[APOSTAS_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const prTot = vv('premios_total'); if (prTot) { const n=parseFloat(prTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[PREMIOS_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
+  const relatorio = fmt('data_relatorio'); if (relatorio) ta.value = ta.value.replace(/\[DATA_RELATORIO\]/g, relatorio);
   if (inicio) {
     ta.value = ta.value
       .replace(/\[DATA_INICIO\]/g, inicio)
@@ -1603,7 +1606,7 @@ async function generatePDF() {
   let y=0;
 
   const v = id => { const el=document.getElementById(id); return el?(el.value||''):''; };
-  const fmtDate = id => { const val=v(id); if(!val) return '–'; try{const[yr,m,d]=val.split('-');return`${d}-${m}-${yr}`;}catch{return val;} };
+  const fmtDate = id => { const val=v(id); if(!val) return '–'; try{const parts=val.split('-'); let yr=parseInt(parts[0]),m=parts[1],d=parts[2]; if(yr<100) yr+=2000; else if(yr<2000) yr+=2000; return`${d}-${m}-${yr}`;}catch{return val;} };
   const fmtNum = id => { const val=v(id); if(!val||isNaN(val)) return '–'; const n=parseFloat(val); return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:n%1===0?0:2,maximumFractionDigits:2}); };
   const fmtV = val => { if(!val||isNaN(val)) return '–'; const n=parseFloat(val); return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:n%1===0?0:2,maximumFractionDigits:2}); };
   const fmtN = val => { if(!val||isNaN(Number(val))) return '–'; const n=parseFloat(val); return n%1===0?String(Math.round(n)):n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); };
@@ -1932,7 +1935,7 @@ async function generateWord() {
   const v = id => { const el=document.getElementById(id); return el ? (el.value||'') : ''; };
   const fmtDate = (id) => {
     const val = v(id); if(!val) return '–';
-    try { const [yr,m,d]=val.split('-'); return `${d}-${m}-${yr}`; } catch{ return val; }
+    try { const parts=val.split('-'); let yr=parseInt(parts[0]),m=parts[1],d=parts[2]; if(yr<100) yr+=2000; else if(yr<2000) yr+=2000; return `${d}-${m}-${yr}`; } catch{ return val; }
   };
   const fmtDateStr = (s) => {
     if (!s) return '–';
