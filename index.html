@@ -6,8 +6,9 @@
 <title>BetWarrior — AML Brasil · Armado de Legajos</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -688,15 +689,26 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
 
   <div class="card">
     <div class="card-title">Tipo de Caso <span style="color:var(--or)">*</span></div>
-    <div class="field">
-      <select id="tipo_caso" onchange="onTipoCasoChange()" required>
-        <option value="">Selecionar tipo de fundamento...</option>
-        <option value="ros_dep_ret">ROS — Inconsistência Econômica em Depósitos e Retiradas com sinais de comportamento suspeito</option>
-        <option value="ros_ap_prem">ROS — Inconsistência Econômica entre Apostas e Prêmios com sinais de comportamento suspeito</option>
-        <option value="ros_no_resp">ROS — Sem resposta à solicitação de ampliação de atividade (sem sinais evidentes)</option>
-        <option value="no_ros">NÃO ROS — O cliente não apresenta indícios para reporte ao SISCOAF</option>
-      </select>
+    <p class="hint" style="margin-bottom:12px">Pode selecionar mais de um fundamento se aplicável.</p>
+    <div style="display:flex;flex-direction:column;gap:8px" id="tipo_caso_checks">
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--field-bdr);border-radius:6px;padding:10px 13px;cursor:pointer;transition:border-color .15s" id="lbl_ros_dep_ret">
+        <input type="checkbox" value="ros_dep_ret" onchange="onTipoCasoChange()" style="margin-top:2px;accent-color:var(--or);flex-shrink:0">
+        <span style="font-size:13px;color:var(--ink2)">ROS — Inconsistência Econômica em Depósitos e Retiradas com sinais de comportamento suspeito</span>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--field-bdr);border-radius:6px;padding:10px 13px;cursor:pointer;transition:border-color .15s" id="lbl_ros_ap_prem">
+        <input type="checkbox" value="ros_ap_prem" onchange="onTipoCasoChange()" style="margin-top:2px;accent-color:var(--or);flex-shrink:0">
+        <span style="font-size:13px;color:var(--ink2)">ROS — Inconsistência Econômica entre Apostas e Prêmios com sinais de comportamento suspeito</span>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--field-bdr);border-radius:6px;padding:10px 13px;cursor:pointer;transition:border-color .15s" id="lbl_ros_no_resp">
+        <input type="checkbox" value="ros_no_resp" onchange="onTipoCasoChange()" style="margin-top:2px;accent-color:var(--or);flex-shrink:0">
+        <span style="font-size:13px;color:var(--ink2)">ROS — Sem resposta à solicitação de ampliação de atividade (sem sinais evidentes)</span>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--field-bdr);border-radius:6px;padding:10px 13px;cursor:pointer;transition:border-color .15s" id="lbl_no_ros">
+        <input type="checkbox" value="no_ros" onchange="onTipoCasoChange()" style="margin-top:2px;accent-color:var(--or);flex-shrink:0">
+        <span style="font-size:13px;color:var(--ink2)">NÃO ROS — O cliente não apresenta indícios para reporte ao SISCOAF</span>
+      </label>
     </div>
+    <input type="hidden" id="tipo_caso" value="">
 
     <div class="fund-preview" id="artigos-preview" style="display:none">
       <div class="fund-preview-title">📋 Artigos da Portaria SPA/MF 1.143/2024 aplicáveis</div>
@@ -1143,7 +1155,7 @@ function readWorkbook(file) {
 }
 function setVal(id, val) {
   const el = document.getElementById(id);
-  if (el) el.value = parseFloat(val||0).toFixed(2);
+  if (el) { const n=parseFloat(val||0); el.value = n%1===0 ? String(Math.round(n)) : n.toFixed(2); }
 }
 function addFileItem(listId, name) {
   const list = document.getElementById(listId);
@@ -1158,7 +1170,8 @@ function showParseWarn(wrapId, msgId, msg) {
   document.getElementById(msgId).textContent = msg;
 }
 function fmtBRLs(val) {
-  return 'R$ ' + parseFloat(val||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const n=parseFloat(val||0); const dec=n%1===0?0:2;
+  return 'R$ ' + n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2});
 }
 
 // ── MENSUAL ──
@@ -1284,7 +1297,7 @@ function buildMonthTableFromData(monthly) {
       for (let m=1; m<=12; m++) {
         const key=`${yr}-${String(m).padStart(2,'0')}`;
         const val = monthly[key] ? (type==='dep'?monthly[key].dep:monthly[key].ret) : 0;
-        html += `<td><input type="number" id="${type}_${yr}_${m}" value="${val>0?val.toFixed(2):''}" min="0" step="0.01" placeholder="0" style="border:none;background:transparent;text-align:center;width:100%;font-size:11px;padding:2px 3px;outline:none" onfocus="this.style.background='#FFF3EF'" onblur="this.style.background='transparent'"></td>`;
+        html += `<td><input type="number" id="${type}_${yr}_${m}" value="${val>0?(val%1===0?Math.round(val).toString():val.toFixed(2)):''}" min="0" step="0.01" placeholder="0" style="border:none;background:transparent;text-align:center;width:100%;font-size:11px;padding:2px 3px;outline:none" onfocus="this.style.background='#FFF3EF'" onblur="this.style.background='transparent'"></td>`;
       }
       html += '</tr>';
     });
@@ -1329,30 +1342,51 @@ function removeFile(listId, name, btn) {
 // ══════════════════════════════════════════
 // TIPO CASO — change handler
 // ══════════════════════════════════════════
+function getSelectedTipos() {
+  return [...document.querySelectorAll('#tipo_caso_checks input[type="checkbox"]:checked')].map(c => c.value);
+}
+
 function onTipoCasoChange() {
-  const tipo = document.getElementById('tipo_caso').value;
+  const tipos = getSelectedTipos();
+
+  // Update hidden field for backward compat (use first selected)
+  document.getElementById('tipo_caso').value = tipos[0] || '';
+
+  // Style checked labels
+  document.querySelectorAll('#tipo_caso_checks label').forEach(lbl => {
+    const chk = lbl.querySelector('input');
+    lbl.style.borderColor = chk.checked ? 'var(--or)' : 'var(--field-bdr)';
+    lbl.style.background = chk.checked ? 'var(--or-light)' : '#fff';
+  });
+
   const artPrev = document.getElementById('artigos-preview');
   const artLista = document.getElementById('artigos-lista');
   const cardNarr = document.getElementById('card-narrativa');
 
-  if (!tipo) { artPrev.style.display='none'; cardNarr.style.display='none'; return; }
+  if (!tipos.length) { artPrev.style.display='none'; cardNarr.style.display='none'; return; }
 
-  // Show artigos
+  // Collect all unique artigos from selected tipos
+  const allArts = [];
+  const seen = new Set();
+  tipos.forEach(tipo => {
+    (ARTIGOS[tipo]||[]).forEach(a => { if(!seen.has(a.cod)) { seen.add(a.cod); allArts.push(a); } });
+  });
+
   artPrev.style.display = 'block';
-  const arts = ARTIGOS[tipo] || [];
-  if (arts.length === 0) {
+  if (!allArts.length) {
     artLista.innerHTML = '<em style="color:var(--lgray);font-size:12px">Nenhum artigo aplicável — caso sem reporte.</em>';
   } else {
-    artLista.innerHTML = arts.map(a => `<div style="margin-bottom:8px"><span class="art-tag">${a.cod}</span> <span style="font-size:12px">${a.txt}</span></div>`).join('');
+    artLista.innerHTML = allArts.map(a => `<div style="margin-bottom:8px"><span class="art-tag">${a.cod}</span> <span style="font-size:12px">${a.txt}</span></div>`).join('');
   }
 
-  // Pre-fill narrative
+  // Pre-fill narrative with first selected type (primary)
   cardNarr.style.display = 'block';
   const ta = document.getElementById('texto_narrativo');
-  let texto = TEXTO_BASE[tipo] || '';
-  // Substitute known fields
-  texto = substituteFields(texto);
-  ta.value = texto;
+  if (!ta.value.trim()) { // only auto-fill if empty
+    let texto = TEXTO_BASE[tipos[0]] || '';
+    texto = substituteFields(texto);
+    ta.value = texto;
+  }
 }
 
 function substituteFields(texto) {
@@ -1378,7 +1412,8 @@ function substituteFields(texto) {
   const fmtNum = (id) => {
     const val = v(id);
     if (!val || isNaN(val)) return '[VALOR]';
-    return parseFloat(val).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const n=parseFloat(val); const dec=n%1===0?0:2;
+    return n.toLocaleString('pt-BR', {minimumFractionDigits:dec, maximumFractionDigits:2});
   };
 
   return texto
@@ -1420,24 +1455,34 @@ async function generateDocuments() {
   const msg = document.getElementById('loadingMsg');
   overlay.classList.add('active');
 
-  const steps = ['Coletando dados do formulário...','Gerando PDF do legajo...','Compilando memo Word...','Finalizando documentos...'];
+  const steps = ['Coletando dados...','Gerando legajo PDF...','Compilando memo Word...','Unificando arquivos anexos...','Finalizando...'];
   let si = 0;
-  const ticker = setInterval(() => { msg.textContent = steps[si++ % steps.length]; }, 1400);
+  const ticker = setInterval(() => { msg.textContent = steps[Math.min(si++, steps.length-1)]; }, 1200);
 
   try {
-    await new Promise(r => setTimeout(r, 400));
-    const pdfBlob = await generatePDF();
     await new Promise(r => setTimeout(r, 300));
+
+    // 1. Generate main legajo PDF (images only)
+    const legajoBlob = await generatePDF();
+    msg.textContent = 'Unificando arquivos PDF anexos...';
+    await new Promise(r => setTimeout(r, 200));
+
+    // 2. Merge attached PDFs using pdf-lib
+    const finalPdfBlob = await mergePDFs(legajoBlob);
+
+    // 3. Generate Word
+    msg.textContent = 'Gerando memo SISCOAF...';
+    await new Promise(r => setTimeout(r, 200));
     const wordBlob = await generateWord();
 
     clearInterval(ticker);
     overlay.classList.remove('active');
 
-    // Setup download buttons
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    const wordUrl = URL.createObjectURL(wordBlob);
     const clientName = (document.getElementById('nome').value + '_' + document.getElementById('sobrenome').value).replace(/\s+/g,'_').toUpperCase();
     const idGrupo = document.getElementById('id_grupo').value || 'LEGAJO';
+
+    const pdfUrl = URL.createObjectURL(finalPdfBlob);
+    const wordUrl = URL.createObjectURL(wordBlob);
 
     document.getElementById('dlPdf').onclick = () => {
       const a = document.createElement('a'); a.href=pdfUrl; a.download=`${idGrupo}_${clientName}_LEGAJO.pdf`; a.click();
@@ -1446,7 +1491,6 @@ async function generateDocuments() {
       const a = document.createElement('a'); a.href=wordUrl; a.download=`${idGrupo}_${clientName}_MEMO_SISCOAF.docx`; a.click();
     };
 
-    // Show result screen
     document.getElementById('step-6').style.display = 'none';
     document.getElementById('resultScreen').style.display = 'block';
     window.scrollTo({top:0,behavior:'smooth'});
@@ -1456,6 +1500,43 @@ async function generateDocuments() {
     alert('Erro ao gerar documentos: ' + err.message);
     console.error(err);
   }
+}
+
+// ── Merge legajo PDF + all attached PDFs using pdf-lib ──
+async function mergePDFs(legajoBlob) {
+  const { PDFDocument } = PDFLib;
+
+  // Load legajo as base
+  const legajoBytes = await legajoBlob.arrayBuffer();
+  const mergedDoc = await PDFDocument.load(legajoBytes);
+
+  const allFileLists = ['list-foto','list-doc','list-buscas','list-outros'];
+  for (const listId of allFileLists) {
+    const files = fileStorage[listId] || [];
+    for (const file of files) {
+      if (!file.data) continue;
+      // Only process PDFs here (images already embedded in legajo)
+      if (!file.name.toLowerCase().endsWith('.pdf')) continue;
+      try {
+        // Convert base64 data URL to ArrayBuffer
+        const b64 = file.data.split(',')[1];
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+        const attachedDoc = await PDFDocument.load(bytes.buffer, { ignoreEncryption: true });
+        const pageIndices = attachedDoc.getPageIndices();
+        const copiedPages = await mergedDoc.copyPages(attachedDoc, pageIndices);
+        copiedPages.forEach(page => mergedDoc.addPage(page));
+      } catch(e) {
+        console.warn('Could not merge PDF:', file.name, e);
+        // Skip this file silently — don't break the whole merge
+      }
+    }
+  }
+
+  const mergedBytes = await mergedDoc.save();
+  return new Blob([mergedBytes], { type: 'application/pdf' });
 }
 
 // ══════════════════════════════════════════
@@ -1469,11 +1550,12 @@ async function generatePDF() {
 
   const v = id => { const el=document.getElementById(id); return el ? (el.value||'') : ''; };
   const fmtDate = (id) => { const val=v(id); if(!val) return '–'; try{const[yr,m,d]=val.split('-');return`${d}-${m}-${yr}`;}catch{return val;} };
-  const fmtNum = (id) => { const val=v(id); if(!val||isNaN(val)) return '–'; return 'R$ '+parseFloat(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); };
-  const fmtNumVal = (val) => { if(!val||isNaN(val)) return '–'; return 'R$ '+parseFloat(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+  const fmtNum = (id) => { const val=v(id); if(!val||isNaN(val)) return '–'; const n=parseFloat(val); const dec=n%1===0?0:2; return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2}); };
+  const fmtNumVal = (val) => { if(!val||isNaN(val)) return '–'; const n=parseFloat(val); const dec=n%1===0?0:2; return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2}); };
   const nome = (v('nome')+' '+v('sobrenome')).toUpperCase();
-  const tipoCaso = document.getElementById('tipo_caso').value;
-  const isROS = tipoCaso !== 'no_ros' && tipoCaso !== '';
+  const selectedTipos = getSelectedTipos();
+  const tipoCaso = selectedTipos[0] || '';
+  const isROS = selectedTipos.length > 0 && !selectedTipos.every(t => t === 'no_ros');
 
   // Font helpers — Calibri-like via helvetica
   const setF = (sz=9, bold=false, color=[30,30,30]) => {
@@ -1697,7 +1779,7 @@ async function generatePDF() {
     doc.rect(ML,y,cw,5.5,'F'); doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,5.5,'S');
     setF(8,false,[20,20,20]);
     doc.text(row[0],ML+2,y+3.8);
-    doc.text(row[1]>0?'$ '+row[1].toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'–',ML+cw*0.35,y+3.8,{align:'center'});
+    const d1=row[1]%1===0?0:2,d2=row[2]%1===0?0:2; doc.text(row[1]>0?'$ '+row[1].toLocaleString('pt-BR',{minimumFractionDigits:d1,maximumFractionDigits:2}):'–',ML+cw*0.35,y+3.8,{align:'center'});
     doc.text(row[2]>0?'$ '+row[2].toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'–',ML+cw*0.75,y+3.8,{align:'center'});
     y+=5.5;
   });
@@ -1710,7 +1792,20 @@ async function generatePDF() {
   y+=7;
 
   // Monthly breakdown — from parsed data
-  const monthly = window.monthTableData || {};
+  // Read from parsed data or fall back to DOM inputs
+  const monthly = (window.monthTableData && Object.keys(window.monthTableData).length > 0)
+    ? window.monthTableData
+    : (() => {
+        const m = {};
+        [2025,2026].forEach(yr => {
+          for (let mo=1; mo<=12; mo++) {
+            const dep = parseFloat(document.getElementById(`dep_${yr}_${mo}`)?.value||0)||0;
+            const ret = parseFloat(document.getElementById(`ret_${yr}_${mo}`)?.value||0)||0;
+            if (dep>0||ret>0) { const k=`${yr}-${String(mo).padStart(2,'0')}`; m[k]={dep,ret}; }
+          }
+        });
+        return m;
+      })();
   const allYears = [...new Set(Object.keys(monthly).map(k=>k.split('-')[0]))].map(Number).sort();
   const tableYears = allYears.length ? allYears : [2025,2026];
   if (!tableYears.includes(2025)) tableYears.unshift(2025);
@@ -1737,7 +1832,7 @@ async function generatePDF() {
       for (let m=1;m<=12;m++) {
         const key=`${yr}-${String(m).padStart(2,'0')}`;
         const val = monthly[key] ? (type==='dep'?monthly[key].dep:monthly[key].ret) : 0;
-        const txt = val>0 ? '$ '+val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '–';
+        const dec=val%1===0?0:2; const txt = val>0 ? '$ '+val.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2}) : '–';
         doc.text(txt, ML+typeColW+colW*(m-1)+colW/2, y+3.8, {align:'center'});
       }
       y+=5.5;
@@ -1808,36 +1903,35 @@ async function generatePDF() {
   const resL=doc.splitTextToSize(resMsg,cw-6); doc.text(resL,ML+3,y+5); y+=17;
   setF(8,true,[40,40,40]); doc.text('DATA DO RELATÓRIO: '+fmtDate('data_relatorio'),ML,y); y+=8;
 
-  // ── APPEND UPLOADED FILES — DOCUMENTAÇÃO section ──
-  const allFileLists = ['list-foto','list-doc','list-buscas','list-outros'];
-  let firstDocSection = true;
-  for (const listId of allFileLists) {
-    const files = fileStorage[listId] || [];
-    for (const file of files) {
-      if (!file.data) continue;
-      try {
-        if (file.type && file.type.startsWith('image/')) {
-          addPage(); y=6;
-          if (firstDocSection) { sectionBar('DOCUMENTAÇÃO'); firstDocSection=false; }
-          else { sectionBar(listId==='list-buscas'?'BUSCAS DE RISCO':'DOCUMENTO ANEXO'); }
-          setF(7,false,[80,80,80]); doc.text(file.name, ML+2, y); y+=5;
+  // ── EMBED IMAGES (JPG/PNG) — PDFs are merged separately by mergePDFs() ──
+  const imgFileLists = ['list-foto','list-doc','list-buscas','list-outros'];
+  let hasImages = false;
+  for (const listId of imgFileLists) {
+    for (const file of (fileStorage[listId]||[])) {
+      if (file.data && file.type && file.type.startsWith('image/')) { hasImages=true; break; }
+    }
+    if (hasImages) break;
+  }
+  if (hasImages) {
+    addPage(); y=6;
+    sectionBar('DOCUMENTAÇÃO');
+    for (const listId of imgFileLists) {
+      for (const file of (fileStorage[listId]||[])) {
+        if (!file.data || !file.type || !file.type.startsWith('image/')) continue;
+        try {
+          setF(7,true,[80,80,80]); doc.text(file.name.toUpperCase(), ML+2, y); y+=4;
           const img = new Image();
           img.src = file.data;
           await new Promise(r=>{ img.onload=r; img.onerror=r; });
-          const maxW=cw, maxH=235;
-          let iw=img.naturalWidth||200, ih=img.naturalHeight||200;
+          const maxW=cw, maxH=252;
+          const iw=img.naturalWidth||200, ih=img.naturalHeight||200;
           const ratio = Math.min(maxW/iw, maxH/ih);
           const dw=iw*ratio, dh=ih*ratio;
+          if (y + dh > 282) { addPage(); y=6; }
           doc.addImage(file.data, file.type==='image/png'?'PNG':'JPEG', ML+(cw-dw)/2, y, dw, dh);
-          y+=dh+5;
-        } else if (file.name.endsWith('.pdf')) {
-          addPage(); y=6;
-          sectionBar('ARQUIVO ANEXO: ' + file.name.substring(0,60).toUpperCase());
-          setF(8,false,[80,80,80]);
-          doc.text('Arquivo PDF: ' + file.name, ML+2, y+8);
-          y+=20;
-        }
-      } catch(e) { console.warn('Could not add file', file.name, e); }
+          y += dh + 8;
+        } catch(e) { console.warn('Could not embed image:', file.name, e); }
+      }
     }
   }
 
@@ -1873,7 +1967,8 @@ async function generateWord() {
   };
   const fmtNum = (id) => {
     const val = v(id); if(!val||isNaN(val)) return '–';
-    return 'R$ ' + parseFloat(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const n = parseFloat(val); const dec = n%1===0?0:2;
+    return 'R$ ' + n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2});
   };
 
   const FONT = 'Segoe UI';
@@ -1881,9 +1976,12 @@ async function generateWord() {
   const SZ_SM = 20;
 
   const nome = (v('nome') + ' ' + v('sobrenome')).toUpperCase();
-  const tipoCaso = document.getElementById('tipo_caso').value;
-  const isROS = tipoCaso !== 'no_ros' && tipoCaso !== '';
-  const artigos = ARTIGOS[tipoCaso] || [];
+  const selectedTipos = getSelectedTipos();
+  const tipoCaso = selectedTipos[0] || '';
+  const isROS = selectedTipos.length > 0 && !selectedTipos.every(t => t === 'no_ros');
+  // Collect all artigos from all selected tipos
+  const artigosSeen = new Set();
+  const artigos = selectedTipos.flatMap(t => (ARTIGOS[t]||[]).filter(a => { if(artigosSeen.has(a.cod)) return false; artigosSeen.add(a.cod); return true; }));
 
   const thinBorder = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
   const borders = { top: thinBorder, bottom: thinBorder, left: thinBorder, right: thinBorder };
