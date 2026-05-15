@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -219,32 +220,32 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="grid-3">
       <div class="field">
         <label>ID do Grupo (Legajo) <span class="req">*</span></label>
-        <input type="text" id="id_grupo" placeholder="Ex: 1015873"
+        <input type="text" id="id_grupo" required placeholder="Ex: 1015873">
         <span class="err-msg">Campo obrigatório</span>
       </div>
       <div class="field">
         <label>ID Interno do Caso <span class="req">*</span></label>
-        <input type="text" id="id_interno" placeholder="Ex: TGBR-196-2026"
+        <input type="text" id="id_interno" required placeholder="Ex: TGBR-196-2026">
         <span class="err-msg">Campo obrigatório</span>
       </div>
       <div class="field">
         <label>CPF <span class="req">*</span></label>
-        <input type="text" id="cpf" placeholder="000.000.000-00"
+        <input type="text" id="cpf" required placeholder="000.000.000-00">
         <span class="err-msg">Campo obrigatório</span>
       </div>
       <div class="field">
         <label>Nome <span class="req">*</span></label>
-        <input type="text" id="nome" placeholder="Primeiro nome"
+        <input type="text" id="nome" required placeholder="Primeiro nome">
         <span class="err-msg">Campo obrigatório</span>
       </div>
       <div class="field">
         <label>Sobrenome <span class="req">*</span></label>
-        <input type="text" id="sobrenome" placeholder="Sobrenome completo"
+        <input type="text" id="sobrenome" required placeholder="Sobrenome completo">
         <span class="err-msg">Campo obrigatório</span>
       </div>
       <div class="field">
         <label>Data de Nascimento <span class="req">*</span></label>
-        <input type="date" id="data_nasc"
+        <input type="date" id="data_nasc" required>
         <span class="err-msg">Campo obrigatório</span>
       </div>
     </div>
@@ -302,12 +303,20 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="grid-3">
       <div class="field">
         <label>Atividade / Ocupação <span class="req">*</span></label>
-        <select id="atividade"
+        <select id="atividade" required>
           <option value="">Selecionar</option>
-          <option>Autônomo</option><option>Empregado CLT</option><option>Empresário</option>
-          <option>Servidor Público</option><option>Profissional Liberal</option>
-          <option>Aposentado / Pensionista</option><option>Estudante</option>
-          <option>Desempregado</option><option>Outro</option>
+          <option>Aposentado</option>
+          <option>Autônomo</option>
+          <option>Cooperativista</option>
+          <option>Empregado Público</option>
+          <option>Empresário</option>
+          <option>Freelancer</option>
+          <option>Microempreendedor</option>
+          <option>Profissional Independente</option>
+          <option>Relação de Dependência</option>
+          <option>Trabalhador Informal</option>
+          <option>Trabalhador Sazonal</option>
+          <option>Outro</option>
         </select>
         <span class="err-msg">Campo obrigatório</span>
       </div>
@@ -320,20 +329,14 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
           <option>Herança / Doação</option><option>Outro</option>
         </select>
       </div>
-      <div class="field">
-        <label>NSE (Nível Socioecon.)</label>
-        <select id="nse">
-          <option value="">Selecionar</option>
-          <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
-        </select>
-      </div>
+
       <div class="field">
         <label>Data de Cadastro na Plataforma</label>
         <input type="date" id="data_cadastro">
       </div>
       <div class="field">
         <label>Situação da Conta <span class="req">*</span></label>
-        <select id="situacao_conta"
+        <select id="situacao_conta" required
           <option value="">Selecionar</option>
           <option>Active</option><option>Suspensa</option><option>Bloqueada</option><option>Cancelada</option>
         </select>
@@ -341,7 +344,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       </div>
       <div class="field">
         <label>Nível de Risco <span class="req">*</span></label>
-        <select id="nivel_risco"
+        <select id="nivel_risco" required
           <option value="">Selecionar</option>
           <option value="Alto">Alto</option>
           <option value="Medio">Médio</option>
@@ -376,7 +379,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="grid-3">
       <div class="field">
         <label>Mês de referência <span class="req">*</span></label>
-        <select id="mes_ref"
+        <select id="mes_ref" required
           <option value="">Selecionar mês</option>
           <option value="Janeiro">Janeiro</option><option value="Fevereiro">Fevereiro</option>
           <option value="Março">Março</option><option value="Abril">Abril</option>
@@ -389,7 +392,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       </div>
       <div class="field">
         <label>Ano <span class="req">*</span></label>
-        <select id="ano_ref"
+        <select id="ano_ref" required
           <option value="">Selecionar</option>
           <option>2024</option><option>2025</option><option selected>2026</option><option>2027</option>
         </select>
@@ -397,7 +400,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       </div>
       <div class="field">
         <label>Forma de Pagamento</label>
-        <input type="text" id="forma_pagamento" placeholder="Ex: XP_W_BankTransfer, PIX">
+        <input type="text" id="forma_pagamento" value="XP_W_BankTransfer" placeholder="XP_W_BankTransfer">
       </div>
     </div>
   </div>
@@ -438,22 +441,31 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="step-letter">C</div>
     <div class="step-info">
       <h2>Dados Transacionais</h2>
-      <p>Movimentações do período e histórico acumulado</p>
+      <p>Carregue os três relatórios do BI — os dados serão extraídos automaticamente</p>
     </div>
   </div>
 
+  <!-- BLOCO 1: MENSUAL -->
   <div class="card">
-    <div class="card-title">Movimentações do Período Analisado</div>
-    <div class="grid-4">
+    <div class="card-title">1 — Transações do Mês Analisado (MENSUAL)</div>
+    <p class="hint" style="margin-bottom:12px">Relatório com depósitos, retiradas, apostas e prêmios do período analisado. Colunas esperadas: <em>Depositos, Cantidad Depositos, Retiros, Cantidad Retiros, Apuestas, Premios.</em></p>
+    <div class="file-upload-area" style="margin-bottom:14px">
+      <label class="file-upload-label">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="14" rx="2" stroke="#FF4500" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div><span>Transações do período (.xlsx)</span><small>Excel exportado do BI com movimentações do mês analisado</small></div>
+        <input type="file" id="file_mensual" accept=".xlsx,.xls,.csv" onchange="parseMensual(this)">
+      </label>
+      <div class="file-list" id="list-mensual"></div>
+    </div>
+    <!-- Fields auto-filled by parseMensual -->
+    <div class="grid-4" id="mensual-fields" style="display:none">
       <div class="field">
-        <label>Qtd. Depósitos <span class="req">*</span></label>
-        <input type="number" id="qtd_dep" placeholder="0" min="0"
-        <span class="err-msg">Campo obrigatório</span>
+        <label>Qtd. Depósitos</label>
+        <input type="number" id="qtd_dep" placeholder="0" min="0">
       </div>
       <div class="field">
-        <label>Valor Depósitos (R$) <span class="req">*</span></label>
-        <input type="number" id="val_dep" placeholder="0.00" min="0" step="0.01"
-        <span class="err-msg">Campo obrigatório</span>
+        <label>Valor Depósitos (R$)</label>
+        <input type="number" id="val_dep" placeholder="0.00" min="0" step="0.01">
       </div>
       <div class="field">
         <label>Qtd. Retiradas</label>
@@ -463,12 +475,42 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <label>Valor Retiradas (R$)</label>
         <input type="number" id="val_ret" placeholder="0.00" min="0" step="0.01">
       </div>
+      <div class="field">
+        <label>Apostas (R$)</label>
+        <input type="number" id="apostas_periodo" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="field">
+        <label>Prêmios (R$)</label>
+        <input type="number" id="premios_periodo" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="field">
+        <label>% Cassino</label>
+        <input type="number" id="pct_casino" placeholder="0" min="0" max="100">
+      </div>
+      <div class="field">
+        <label>% Esportivo</label>
+        <input type="number" id="pct_esportivo" placeholder="0" min="0" max="100">
+      </div>
+    </div>
+    <div id="mensual-parsed-ok" style="display:none;margin-top:10px" class="inline-alert" style="background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span id="mensual-parsed-msg"></span>
     </div>
   </div>
 
+  <!-- BLOCO 2: HISTORICO -->
   <div class="card">
-    <div class="card-title">Histórico Acumulado (Conta Completa)</div>
-    <div class="grid-4">
+    <div class="card-title">2 — Histórico Acumulado do Cliente (HISTORICO)</div>
+    <p class="hint" style="margin-bottom:12px">Relatório com totais acumulados desde o início da conta. Mesmas colunas que MENSUAL mas com todo o histórico.</p>
+    <div class="file-upload-area" style="margin-bottom:14px">
+      <label class="file-upload-label">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="14" rx="2" stroke="#FF4500" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div><span>Histórico acumulado da conta (.xlsx)</span><small>Excel exportado do BI com totais desde o início da conta</small></div>
+        <input type="file" id="file_historico" accept=".xlsx,.xls,.csv" onchange="parseHistorico(this)">
+      </label>
+      <div class="file-list" id="list-historico"></div>
+    </div>
+    <div class="grid-4" id="historico-fields" style="display:none">
       <div class="field">
         <label>Depósitos Totais (R$)</label>
         <input type="number" id="dep_total" placeholder="0.00" min="0" step="0.01">
@@ -486,16 +528,38 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <input type="number" id="premios_total" placeholder="0.00" min="0" step="0.01">
       </div>
     </div>
-    <div class="grid-3" style="margin-top:14px">
-      <div class="field">
-        <label>% Casino</label>
-        <input type="number" id="pct_casino" placeholder="0" min="0" max="100">
-        <span class="hint">Percentual da atividade em jogos de cassino</span>
-      </div>
-      <div class="field">
-        <label>% Apostas Esportivas</label>
-        <input type="number" id="pct_esportivo" placeholder="0" min="0" max="100">
-      </div>
+    <div id="historico-parsed-ok" style="display:none;margin-top:10px" class="inline-alert" style="background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span id="historico-parsed-msg"></span>
+    </div>
+  </div>
+
+  <!-- BLOCO 3: DETALLE HISTORICO -->
+  <div class="card">
+    <div class="card-title">3 — Detalhe por Data — Overview (DETALLE HISTORICO)</div>
+    <p class="hint" style="margin-bottom:12px">Relatório diário com depósitos e retiradas por data. Colunas: <em>Date, Deposit Local Curr, Withdrawal Local Curr.</em> Usado para construir a tabela mensal e o overview transacional.</p>
+    <div class="file-upload-area" style="margin-bottom:14px">
+      <label class="file-upload-label">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="14" rx="2" stroke="#FF4500" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div><span>Detalhe diário de transações (.xlsx)</span><small>Excel exportado do BI com movimentações por data para o overview</small></div>
+        <input type="file" id="file_detalle" accept=".xlsx,.xls,.csv" onchange="parseDetalle(this)">
+      </label>
+      <div class="file-list" id="list-detalle"></div>
+    </div>
+    <div id="detalle-parsed-ok" style="display:none;margin-top:10px" class="inline-alert" style="background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span id="detalle-parsed-msg"></span>
+    </div>
+    <!-- Preview tabla mensual auto-generada -->
+    <div id="detalle-table-wrap" style="display:none;margin-top:14px;overflow-x:auto">
+      <div class="card-title" style="margin-bottom:8px">Tabela Transacional Mensal — gerada automaticamente</div>
+      <table class="month-table" id="monthTable"></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Outros dados transacionais</div>
+    <div class="grid-2">
       <div class="field">
         <label>Intermediário?</label>
         <select id="intermediario">
@@ -503,25 +567,6 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
           <option value="Sim. Detalhar nas observações.">Sim</option>
         </select>
       </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Tabela Transacional Mensal</div>
-    <p class="hint" style="margin-bottom:12px">Carregue o arquivo Excel de transações do BI para preencher automaticamente, ou preencha manualmente.</p>
-    <div class="file-upload-area" style="margin-bottom:14px">
-      <label class="file-upload-label">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="14" rx="2" stroke="#FF4500" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <div>
-          <span>Carregar Excel de transações (.xlsx)</span>
-          <small>O sistema extrairá os dados mensais automaticamente</small>
-        </div>
-        <input type="file" id="excel_trans" accept=".xlsx,.xls,.csv" onchange="loadExcelTransactions(this)">
-      </label>
-      <div class="file-list" id="excel-list"></div>
-    </div>
-    <div style="overflow-x:auto">
-      <table class="month-table" id="monthTable"></table>
     </div>
   </div>
 
@@ -592,10 +637,6 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     </div>
     <div class="grid-2" style="margin-top:14px">
       <div class="field">
-        <label>ID da Avaliação (sistema de buscas)</label>
-        <input type="text" id="id_avaliacao" placeholder="Ex: 103.518.056">
-      </div>
-      <div class="field">
         <label>Data da Busca</label>
         <input type="date" id="data_busca">
       </div>
@@ -644,7 +685,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
   <div class="card">
     <div class="card-title">Tipo de Caso <span style="color:var(--or)">*</span></div>
     <div class="field">
-      <select id="tipo_caso" onchange="onTipoCasoChange()"
+      <select id="tipo_caso" onchange="onTipoCasoChange()" required
         <option value="">Selecionar tipo de fundamento...</option>
         <option value="ros_dep_ret">ROS — Inconsistência Econômica em Depósitos e Retiradas com sinais de comportamento suspeito</option>
         <option value="ros_ap_prem">ROS — Inconsistência Econômica entre Apostas e Prêmios com sinais de comportamento suspeito</option>
@@ -722,17 +763,8 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="card-title">Profissionais Envolvidos</div>
     <div class="grid-3">
       <div class="field">
-        <label>Analista Responsável <span class="req">*</span></label>
-        <input type="text" id="analista" placeholder="Nome completo"
-        <span class="err-msg">Campo obrigatório</span>
-      </div>
-      <div class="field">
-        <label>Responsável AML</label>
-        <input type="text" id="resp_aml" placeholder="Nome completo">
-      </div>
-      <div class="field">
-        <label>Supervisor</label>
-        <input type="text" id="supervisor" placeholder="Nome completo">
+        <label>Analista Responsável</label>
+        <input type="text" id="analista" value="Amparo Zenoni" placeholder="Nome do analista">
       </div>
     </div>
   </div>
@@ -742,12 +774,12 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="grid-3">
       <div class="field">
         <label>Data de Início <span class="req">*</span></label>
-        <input type="date" id="data_inicio"
+        <input type="date" id="data_inicio" required>
         <span class="err-msg">Campo obrigatório</span>
       </div>
       <div class="field">
         <label>Data de Término <span class="req">*</span></label>
-        <input type="date" id="data_fim"
+        <input type="date" id="data_fim" required>
         <span class="err-msg">Campo obrigatório</span>
       </div>
       <div class="field">
@@ -805,36 +837,13 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
   </div>
 
   <div class="card">
-    <div class="card-title">Comprovante de Atividade / Renda</div>
-    <div class="file-upload-area">
-      <label class="file-upload-label">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3v9M7 9l3 3 3-3" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="14" width="14" height="3" rx="1" stroke="#FF4500" stroke-width="1.5"/></svg>
-        <div><span>Documentos de renda / atividade (se houver)</span><small>PDF, JPG, PNG — múltiplos arquivos permitidos</small></div>
-        <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="addFiles(this,'list-renda')">
-      </label>
-      <div class="file-list" id="list-renda"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Extrato / Relatório de Transações</div>
-    <div class="file-upload-area">
-      <label class="file-upload-label">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="#FF4500" stroke-width="1.5"/><path d="M7 7h6M7 10h6M7 13h4" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <div><span>Extrato de transações / relatório BI</span><small>PDF, XLSX — múltiplos arquivos permitidos</small></div>
-        <input type="file" multiple accept=".pdf,.xlsx,.xls,.csv" onchange="addFiles(this,'list-extrato')">
-      </label>
-      <div class="file-list" id="list-extrato"></div>
-    </div>
-  </div>
-
-  <div class="card">
     <div class="card-title">Outros Documentos Relevantes</div>
+    <p class="hint" style="margin-bottom:12px">Adjunte todos os arquivos que devem ser incluídos no PDF: documentos de identidade, comprovantes de renda, extratos, buscas, correspondência, prints do sistema, etc. Múltiplos arquivos permitidos.</p>
     <div class="file-upload-area">
       <label class="file-upload-label">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4h12v12H4z" stroke="#FF4500" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 10h4M10 8v4" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <div><span>Correspondência, declarações, prints do sistema, etc.</span><small>PDF, JPG, PNG — múltiplos arquivos</small></div>
-        <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="addFiles(this,'list-outros')">
+        <div><span>Selecionar arquivos</span><small>PDF, JPG, PNG, XLSX — múltiplos arquivos</small></div>
+        <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls" onchange="addFiles(this,'list-outros')">
       </label>
       <div class="file-list" id="list-outros"></div>
     </div>
@@ -1066,7 +1075,32 @@ function prevStep(from) {
 }
 
 function validateStep(step) {
-  return true; // MODO PRUEBA — validación desactivada
+  let ok = true;
+  document.querySelectorAll('#step-' + step + ' [required]').forEach(el => {
+    const field = el.closest('.field');
+    if (!el.value || !el.value.trim()) {
+      if (field) field.classList.add('show-err');
+      el.classList.add('error');
+      ok = false;
+    } else {
+      if (field) field.classList.remove('show-err');
+      el.classList.remove('error');
+    }
+    // Clear error as soon as user types/selects
+    el.addEventListener('input', () => {
+      el.classList.remove('error');
+      if (field) field.classList.remove('show-err');
+    }, { once: true });
+    el.addEventListener('change', () => {
+      el.classList.remove('error');
+      if (field) field.classList.remove('show-err');
+    }, { once: true });
+  });
+  if (!ok) {
+    const firstErr = document.querySelector('#step-' + step + ' .error');
+    if (firstErr) firstErr.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+  return ok;
 }
 
 // ══════════════════════════════════════════
@@ -1091,34 +1125,138 @@ function buildAlertasList() {
 // ══════════════════════════════════════════
 const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-function buildMonthTable() {
-  const years = [2025, 2026];
-  let html = '<thead>';
-  html += '<tr><th>Tipo</th>' + MONTHS.map(m => `<th>${m}</th>`).join('') + '</tr></thead><tbody>';
+// ── Shared Excel reader ──
+function readWorkbook(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try { resolve(XLSX.read(new Uint8Array(e.target.result), {type:'array', cellDates:true})); }
+      catch(err) { reject(err); }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = parseFloat(val||0).toFixed(2);
+}
+function addFileItem(listId, name) {
+  const list = document.getElementById(listId);
+  if (list) list.innerHTML = `<div class="file-item"><span class="fi-icon">✓</span><span class="fi-name">${name}</span></div>`;
+}
+function showParseOk(wrapId, msgId, msg) {
+  document.getElementById(wrapId).style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 14px;background:#F0FFF4;border:1px solid #BBF7D0;border-radius:6px;font-size:12px;color:#14532D';
+  document.getElementById(msgId).textContent = msg;
+}
+function showParseWarn(wrapId, msgId, msg) {
+  document.getElementById(wrapId).style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 14px;background:#FFFBF0;border:1px solid #F5CC60;border-radius:6px;font-size:12px;color:#7A5200';
+  document.getElementById(msgId).textContent = msg;
+}
+function fmtBRLs(val) {
+  return 'R$ ' + parseFloat(val||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+// ── MENSUAL ──
+async function parseMensual(input) {
+  const file = input.files[0]; if (!file) return;
+  addFileItem('list-mensual', file.name); input.value='';
+  try {
+    const wb = await readWorkbook(file);
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:null});
+    const data = rows.find(r => r['ID Cliente'] && r['ID Cliente'] !== 'Total' && !isNaN(Number(r['ID Cliente'])));
+    if (data) {
+      setVal('qtd_dep', data['Cantidad Depositos']||0);
+      setVal('val_dep', data['Depositos']||0);
+      setVal('qtd_ret', data['Cantidad Retiros']||0);
+      setVal('val_ret', data['Retiros']||0);
+      setVal('apostas_periodo', data['Apuestas']||0);
+      setVal('premios_periodo', data['Premios']||0);
+      document.getElementById('mensual-fields').style.display='grid';
+      showParseOk('mensual-parsed-ok','mensual-parsed-msg',
+        `✓  ${data['Cantidad Depositos']||0} depósitos · ${fmtBRLs(data['Depositos'])}  |  ${data['Cantidad Retiros']||0} retiradas · ${fmtBRLs(data['Retiros'])}  |  Apostas ${fmtBRLs(data['Apuestas'])}  |  Prêmios ${fmtBRLs(data['Premios'])}`);
+    } else {
+      document.getElementById('mensual-fields').style.display='grid';
+      showParseWarn('mensual-parsed-ok','mensual-parsed-msg','Arquivo carregado. Ajuste os valores manualmente.');
+    }
+  } catch(e) { showParseWarn('mensual-parsed-ok','mensual-parsed-msg','Erro: '+e.message); }
+}
+
+// ── HISTORICO ──
+async function parseHistorico(input) {
+  const file = input.files[0]; if (!file) return;
+  addFileItem('list-historico', file.name); input.value='';
+  try {
+    const wb = await readWorkbook(file);
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:null});
+    const data = rows.find(r => r['ID Cliente'] && r['ID Cliente'] !== 'Total' && !isNaN(Number(r['ID Cliente'])));
+    if (data) {
+      setVal('dep_total', data['Depositos']||0);
+      setVal('ret_total', data['Retiros']||0);
+      setVal('apostas_total', data['Apuestas']||0);
+      setVal('premios_total', data['Premios']||0);
+      document.getElementById('historico-fields').style.display='grid';
+      showParseOk('historico-parsed-ok','historico-parsed-msg',
+        `✓  Dep ${fmtBRLs(data['Depositos'])}  |  Ret ${fmtBRLs(data['Retiros'])}  |  Apostas ${fmtBRLs(data['Apuestas'])}  |  Prêmios ${fmtBRLs(data['Premios'])}`);
+    } else {
+      document.getElementById('historico-fields').style.display='grid';
+      showParseWarn('historico-parsed-ok','historico-parsed-msg','Arquivo carregado. Ajuste os valores manualmente.');
+    }
+  } catch(e) { showParseWarn('historico-parsed-ok','historico-parsed-msg','Erro: '+e.message); }
+}
+
+// ── DETALLE HISTORICO → tabela mensal ──
+async function parseDetalle(input) {
+  const file = input.files[0]; if (!file) return;
+  addFileItem('list-detalle', file.name); input.value='';
+  try {
+    const wb = await readWorkbook(file);
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:null, raw:false});
+    const monthly = {};
+    rows.forEach(r => {
+      const dateVal = r['Date']; if (!dateVal) return;
+      let d = (dateVal instanceof Date) ? dateVal : new Date(dateVal);
+      if (isNaN(d.getTime())) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if (!monthly[key]) monthly[key]={dep:0,ret:0};
+      monthly[key].dep += parseFloat(r['Deposit Local Curr']||0)||0;
+      monthly[key].ret += parseFloat(r['Withdrawal Local Curr']||0)||0;
+    });
+    window.monthTableData = monthly;
+    buildMonthTableFromData(monthly);
+    document.getElementById('detalle-table-wrap').style.display='block';
+    showParseOk('detalle-parsed-ok','detalle-parsed-msg',
+      `✓  ${rows.length} transações lidas — tabela mensal gerada (${Object.keys(monthly).length} meses com movimentação)`);
+  } catch(e) { showParseWarn('detalle-parsed-ok','detalle-parsed-msg','Erro: '+e.message); }
+}
+
+// ── Build month table from parsed data ──
+function buildMonthTableFromData(monthly) {
+  const allYears = [...new Set(Object.keys(monthly).map(k=>k.split('-')[0]))].map(Number).sort();
+  const years = allYears.length ? allYears : [2025, 2026];
+  if (!years.includes(2025) && years[0] > 2025) years.unshift(2025);
+  if (!years.includes(2026)) years.push(2026);
+
+  let html = `<thead><tr><th style="text-align:left;min-width:80px;padding:6px 8px">Tipo</th>`;
+  MONTHS.forEach(m => html += `<th>${m}</th>`);
+  html += '</tr></thead><tbody>';
   years.forEach(yr => {
     html += `<tr><td colspan="13" class="yr-header">${yr}</td></tr>`;
-    html += `<tr><td style="font-weight:700;font-size:11px;color:var(--gray);padding:5px 8px;background:#FAFAFA">Depósitos</td>`;
-    MONTHS.forEach((m,i) => {
-      html += `<td><input type="number" id="dep_${yr}_${i+1}" min="0" step="0.01" placeholder="0"></td>`;
+    ['dep','ret'].forEach(type => {
+      html += `<tr><td style="font-weight:700;font-size:11px;color:var(--gray);padding:5px 8px;background:#FAFAFA;white-space:nowrap">${type==='dep'?'Depósitos':'Retiradas'}</td>`;
+      for (let m=1; m<=12; m++) {
+        const key=`${yr}-${String(m).padStart(2,'0')}`;
+        const val = monthly[key] ? (type==='dep'?monthly[key].dep:monthly[key].ret) : 0;
+        html += `<td><input type="number" id="${type}_${yr}_${m}" value="${val>0?val.toFixed(2):''}" min="0" step="0.01" placeholder="0" style="border:none;background:transparent;text-align:center;width:100%;font-size:11px;padding:2px 3px;outline:none" onfocus="this.style.background='#FFF3EF'" onblur="this.style.background='transparent'"></td>`;
+      }
+      html += '</tr>';
     });
-    html += '</tr>';
-    html += `<tr><td style="font-weight:700;font-size:11px;color:var(--gray);padding:5px 8px;background:#FAFAFA">Retiradas</td>`;
-    MONTHS.forEach((m,i) => {
-      html += `<td><input type="number" id="ret_${yr}_${i+1}" min="0" step="0.01" placeholder="0"></td>`;
-    });
-    html += '</tr>';
   });
   html += '</tbody>';
   document.getElementById('monthTable').innerHTML = html;
 }
 
-function loadExcelTransactions(input) {
-  // Visual feedback only — real parsing would need SheetJS
-  const file = input.files[0];
-  if (!file) return;
-  addFiles(input, 'excel-list');
-  alert('Arquivo carregado: ' + file.name + '\n\nPreencha a tabela mensal manualmente com os dados do arquivo.');
-}
+function buildMonthTable() { buildMonthTableFromData({}); }
 
 // ══════════════════════════════════════════
 // FILE UPLOAD
@@ -1553,8 +1691,6 @@ async function generatePDF() {
   headerBar('Procedimento Interno');
   twoColRow('Data de Início:', fmtDate('data_inicio'), 'Data de Término:', fmtDate('data_fim'));
   tableRow('Analista Responsável:', v('analista'));
-  if (v('resp_aml')) tableRow('Responsável AML:', v('resp_aml'));
-  if (v('supervisor')) tableRow('Supervisor:', v('supervisor'));
   y += 4;
 
   // RESULTADO
@@ -1705,8 +1841,8 @@ async function generateWord() {
             new TableRow({ children: [ labelCell("Data da Operação:"), valCell(fmtDate('data_inicio')) ] }),
             new TableRow({ children: [ labelCell("Data do Fim da Operação:"), valCell(fmtDate('data_fim')) ] }),
             new TableRow({ children: [ labelCell("Estado/Cidade:"), valCell(v('localidade') + (v('estado_uf') ? ' – ' + v('estado_uf') : '')) ] }),
-            new TableRow({ children: [ labelCell("Valor apostado (período):"), valCell(fmtNum('apostas_total')) ] }),
-            new TableRow({ children: [ labelCell("Valor dos prêmios (período):"), valCell(fmtNum('premios_total')) ] }),
+            new TableRow({ children: [ labelCell("Valor apostado (período):"), valCell(fmtNum('apostas_periodo') !== '–' ? fmtNum('apostas_periodo') : fmtNum('apostas_total')) ] }),
+            new TableRow({ children: [ labelCell("Valor dos prêmios (período):"), valCell(fmtNum('premios_periodo') !== '–' ? fmtNum('premios_periodo') : fmtNum('premios_total')) ] }),
             new TableRow({ children: [ labelCell("Outros valores:"), valCell("–") ] }),
             new TableRow({ children: [ labelCell("Categoria / modalidade:"), valCell((v('pct_casino')||'–') + '% cassino e ' + (v('pct_esportivo')||'–') + '% apostas esportivas') ] }),
             new TableRow({ children: [ labelCell("Forma de pagamento:"), valCell(v('forma_pagamento')) ] }),
@@ -1729,7 +1865,7 @@ async function generateWord() {
           rows: [
             new TableRow({ children: [ labelCell("Data de início do procedimento:"), valCell(fmtDate('data_inicio')) ] }),
             new TableRow({ children: [ labelCell("Data de término do procedimento:"), valCell(fmtDate('data_fim')) ] }),
-            new TableRow({ children: [ labelCell("Profissionais envolvidos:"), valCell([v('analista'), v('resp_aml'), v('supervisor')].filter(Boolean).join(' · ') || '–') ] }),
+            new TableRow({ children: [ labelCell("Profissionais envolvidos:"), valCell(v('analista') ? v('analista') + ' (Analista) · Responsável AML · Supervisor' : 'Analista · Responsável AML · Supervisor') ] }),
           ]
         }),
 
@@ -1791,9 +1927,9 @@ function resetForm() {
 window.addEventListener('DOMContentLoaded', () => {
   buildAlertasList();
   buildMonthTable();
-  // Set today as default for data_relatorio
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('data_relatorio').value = today;
+  document.getElementById('data_busca').value = today;
 });
 </script>
 </body>
