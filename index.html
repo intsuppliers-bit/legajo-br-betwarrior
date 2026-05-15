@@ -1233,73 +1233,59 @@ async function parseDetalle(input) {
   const file = input.files[0]; if (!file) return;
   addFileItem('list-detalle', file.name); input.value='';
   try {
-    // Read with cellDates:true so Date objects come through properly
+    // raw:true → números como valores puros, fechas como objetos Date (cellDates:true en readWorkbook)
     const wb = await readWorkbook(file);
     const ws = wb.Sheets[wb.SheetNames[0]];
-    // Use raw:false so dates are formatted strings, easier to parse
-    const rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:true});
 
     const monthly = {};
     let parsed = 0;
     let skipped = 0;
 
     rows.forEach(r => {
-      const pid = String(r['PARTYID']||'').trim();
-      if (!pid || !/^\d+$/.test(pid)) return;
+      // Saltar filas de Total/Filtros — PARTYID debe ser número
+      const pid = r['PARTYID'];
+      if (pid === null || pid === undefined) return;
+      if (typeof pid !== 'number' && isNaN(Number(String(pid).trim()))) return;
+
       const dateVal = r['Date'];
       if (!dateVal) return;
 
       let d = null;
-      const s = String(dateVal).trim();
 
-      // Try all common formats
-      if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-        // ISO: 2026-03-30
-        d = new Date(s.substring(0, 10) + 'T12:00:00');
-      } else if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
-        // BR: 30/03/2026
-        const [dd, mm, yyyy] = s.split('/');
-        d = new Date(`${yyyy}-${mm}-${dd}T12:00:00`);
-      } else if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
-        // US: 3/30/2026
-        const parts = s.split('/');
-        d = new Date(`${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}T12:00:00`);
-      } else if (!isNaN(Number(s)) && Number(s) > 40000) {
-        // Excel serial number fallback
-        const serial = Number(s);
-        d = new Date(Math.round((serial - 25569) * 86400 * 1000));
+      if (dateVal instanceof Date) {
+        // cellDates:true ya convirtió → usar año/mes/día local directamente
+        d = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate(), 12);
+      } else if (typeof dateVal === 'number' && dateVal > 40000) {
+        // Serial Excel: convertir con UTC para evitar timezone shift
+        const ms = Math.round((dateVal - 25569) * 86400 * 1000);
+        const tmp = new Date(ms);
+        d = new Date(tmp.getUTCFullYear(), tmp.getUTCMonth(), tmp.getUTCDate(), 12);
+      } else {
+        const s = String(dateVal).trim();
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+          d = new Date(s.substring(0,10) + 'T12:00:00');
+        } else if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+          const [dd,mm,yyyy] = s.split('/');
+          d = new Date(`${yyyy}-${mm}-${dd}T12:00:00`);
+        } else if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
+          const p = s.split('/');
+          d = new Date(`${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}T12:00:00`);
+        }
       }
 
       if (!d || isNaN(d.getTime())) { skipped++; return; }
 
       const yr = d.getFullYear();
       const mo = d.getMonth() + 1;
-      // Sanity check: year should be reasonable
-      if (yr < 2020 || yr > 2030) { skipped++; return; }
+      if (yr < 2020 || yr > 2035) { skipped++; return; }
 
       const key = `${yr}-${String(mo).padStart(2,'0')}`;
       if (!monthly[key]) monthly[key] = {dep:0, ret:0};
-      const _parseNum = s => {
-        const str = String(s||'0').trim();
-        if(!str || str==='-') return 0;
-        // If has both . and , → dot=thousands or comma=thousands
-        // SheetJS with raw:false always uses JS locale: comma=thousands, dot=decimal
-        // e.g. "2,540.00" → remove commas → "2540.00"
-        // e.g. "2.540,00" → remove dots → replace comma → "2540.00"
-        if(str.includes(',') && str.includes('.')) {
-          const dotIdx = str.lastIndexOf('.');
-          const commaIdx = str.lastIndexOf(',');
-          if(commaIdx > dotIdx) { // comma is decimal separator
-            return parseFloat(str.replace(/\./g,'').replace(',','.')) || 0;
-          } else { // dot is decimal separator
-            return parseFloat(str.replace(/,/g,'')) || 0;
-          }
-        }
-        if(str.includes(',') && !str.includes('.')) return parseFloat(str.replace(',','.')) || 0;
-        return parseFloat(str) || 0;
-      };
-      const dep = (typeof r['Deposit Local Curr']==='number') ? r['Deposit Local Curr'] : _parseNum(r['Deposit Local Curr']);
-      const ret = (typeof r['Withdrawal Local Curr']==='number') ? r['Withdrawal Local Curr'] : _parseNum(r['Withdrawal Local Curr']);
+
+      // raw:true → números directos, sin formato
+      const dep = (typeof r['Deposit Local Curr'] === 'number') ? r['Deposit Local Curr'] : 0;
+      const ret = (typeof r['Withdrawal Local Curr'] === 'number') ? r['Withdrawal Local Curr'] : 0;
       monthly[key].dep += dep;
       monthly[key].ret += ret;
       parsed++;
@@ -1929,7 +1915,6 @@ async function generatePDF() {
   row2('Ocupação',v('atividade')||'–','Fonte de Fundos',v('fonte_fundos')||'–');
   y+=4;
 
-  // Siempre leer inputs actuales (refleja ediciones manuales)
   const monthly=(()=>{const m={};
     document.querySelectorAll('[id^="dep_"],[id^="ret_"]').forEach(el=>{
       const parts=el.id.split('_');const type=parts[0];const yr=parts[1];const mo=parts[2];
