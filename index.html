@@ -336,6 +336,11 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <input type="date" id="data_cadastro">
       </div>
       <div class="field">
+        <label>Data do Primeiro Depósito</label>
+        <input type="date" id="data_primeiro_dep" onchange="resubstituteNarrative()">
+        <span class="hint">Usado no texto narrativo</span>
+      </div>
+      <div class="field">
         <label>Situação da Conta <span class="req">*</span></label>
         <select id="situacao_conta" required>
           <option value="">Selecionar</option>
@@ -1004,7 +1009,7 @@ Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o clien
 
 No que se refere ao perfil econômico declarado, o cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos utilizados na plataforma seriam provenientes de [FONTE_FUNDOS]. Não obstante, o cliente não respondeu à solicitação de ampliação de atividade e origem de fundos, impossibilitando a verificação e validação das informações cadastrais e financeiras declaradas.
 
-De acordo com o relatório transacional consolidado, o cliente registra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL], saques totais de R$ [RET_TOTAL], apostas totais no valor de R$ [APOSTAS_TOTAL] e prêmios totais de R$ [PREMIOS_TOTAL].
+De acordo com o relatório transacional consolidado, o cliente registra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL], saques totais de R$ [RET_TOTAL], apostas totais no valor de R$ [APOSTAS_TOTAL] e prêmios totais de R$ [PREMIOS_TOTAL]. A data confirmada do primeiro depósito é [DATA_PRIMEIRO_DEP].
 
 Foram realizadas buscas utilizando o nome completo do cliente nas seguintes bases: lista da OFAC, lista de Pessoas Politicamente Expostas (PEP) do Estado brasileiro, listas internacionais relacionadas ao terrorismo, lista de jurisdições monitoradas pelo GAFI e lista da Receita Federal do Brasil (RFB) relativa a países com regimes fiscais preferenciais ou privilegiados. Não foram identificadas correspondências positivas. Da mesma forma, as pesquisas de mídia adversa não retornaram informações negativas que comprometessem o cliente ou indicassem envolvimento em atividades ilícitas.
 
@@ -1018,7 +1023,7 @@ No que se refere ao perfil econômico declarado, o cliente informou exercer ativ
 
 Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET], registrando elevado nível de transacionalidade dentro da plataforma.
 
-De acordo com o relatório transacional consolidado, o cliente concentra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas, alcançando volume total de apostas de R$ [APOSTAS_TOTAL] e prêmios no valor de R$ [PREMIOS_TOTAL], evidenciando dinâmica operacional relevante dentro da plataforma.
+De acordo com o relatório transacional consolidado, o cliente concentra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas, alcançando volume total de apostas de R$ [APOSTAS_TOTAL] e prêmios no valor de R$ [PREMIOS_TOTAL], evidenciando dinâmica operacional relevante dentro da plataforma. A data confirmada do primeiro depósito é [DATA_PRIMEIRO_DEP].
 
 Embora não tenham sido identificados padrões transacionais que indiquem de forma direta práticas relacionadas à lavagem de dinheiro ou financiamento do terrorismo, observa-se volume elevado de transações em apostas e prêmios. Referido volume não se mostra compatível com o perfil econômico declarado pelo cliente, evidenciando inconsistência entre a atividade informada e a movimentação financeira observada na plataforma.
 
@@ -1032,7 +1037,7 @@ O cliente superou o limiar interno correspondente ao nível de risco [NIVEL_RISC
 
 No que se refere ao perfil econômico declarado, o cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos utilizados na plataforma seriam provenientes de [FONTE_FUNDOS]. Com o objetivo de confirmar a veracidade das informações prestadas, a equipe de Customer Support (CS) realizou tentativas de contato para solicitação de informações adicionais e documentação comprobatória relativas à atividade declarada e à origem dos recursos. Contudo, não houve resposta por parte do cliente, não sendo possível comprovar de forma independente as informações fornecidas.
 
-De acordo com o relatório transacional consolidado, o cliente registra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL], apostas totais no valor de R$ [APOSTAS_TOTAL] e prêmios totais de R$ [PREMIOS_TOTAL].
+De acordo com o relatório transacional consolidado, o cliente registra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL], apostas totais no valor de R$ [APOSTAS_TOTAL] e prêmios totais de R$ [PREMIOS_TOTAL]. A data confirmada do primeiro depósito é [DATA_PRIMEIRO_DEP].
 
 No primeiro contato realizado pela equipe responsável, a conta do cliente foi suspensa de forma preventiva, em conformidade com os procedimentos internos, sendo informado que a suspensão teria caráter temporário e permaneceria vigente até o envio das informações e documentos solicitados. Ainda assim, conforme previsto na política interna, foram encaminhados avisos adicionais no terceiro, sexto e sétimo dia, reforçando a necessidade de resposta e esclarecendo que a conta permaneceria suspensa até a regularização cadastral. Decorridos os sete dias estabelecidos, não houve qualquer resposta por parte do cliente.
 
@@ -1050,7 +1055,7 @@ Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o clien
 
 No que se refere ao perfil econômico declarado, o cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos utilizados na plataforma seriam provenientes de [FONTE_FUNDOS]. As informações prestadas pelo cliente foram verificadas e mostraram-se compatíveis com o perfil econômico-financeiro declarado.
 
-De acordo com o relatório transacional consolidado, o cliente registra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL], saques totais de R$ [RET_TOTAL], apostas totais no valor de R$ [APOSTAS_TOTAL] e prêmios totais de R$ [PREMIOS_TOTAL].
+De acordo com o relatório transacional consolidado, o cliente registra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL], saques totais de R$ [RET_TOTAL], apostas totais no valor de R$ [APOSTAS_TOTAL] e prêmios totais de R$ [PREMIOS_TOTAL]. A data confirmada do primeiro depósito é [DATA_PRIMEIRO_DEP].
 
 Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, não tendo sido identificadas correspondências positivas. As pesquisas de mídia adversa tampouco retornaram informações negativas.
 
@@ -1452,6 +1457,7 @@ function substituteFields(texto) {
     .replace(/\[ATIVIDADE\]/g, v('atividade') || '[ATIVIDADE]')
     .replace(/\[FONTE_FUNDOS\]/g, v('fonte_fundos') || '[FONTE_FUNDOS]')
     .replace(/\[NIVEL_RISCO\]/g, (v('nivel_risco')||'[RISCO]').toLowerCase())
+    .replace(/\[DATA_PRIMEIRO_DEP\]/g, fmt('data_primeiro_dep') || '[DATA_PRIMEIRO_DEP]')
     .replace(/\[DATA_INICIO\]/g, fmt('data_inicio') || '[DATA_INICIO]')
     .replace(/\[DATA_FIM\]/g, fmt('data_fim') || '[DATA_FIM]')
     .replace(/\[DATA_ALERTA_INTERNO\]/g, fmt('data_inicio') || '[DATA_ALERTA]');
@@ -1464,6 +1470,8 @@ function resubstituteNarrative() {
   const fmt = id => { const el=document.getElementById(id); if(!el||!el.value) return null; try{const[yr,m,d]=el.value.split('-');return`${d}/${m}/${yr}`;}catch{return null;} };
   const inicio = fmt('data_inicio');
   const fim = fmt('data_fim');
+  const primDep = fmt('data_primeiro_dep');
+  if (primDep) ta.value = ta.value.replace(/\[DATA_PRIMEIRO_DEP\]/g, primDep);
   if (inicio) {
     ta.value = ta.value
       .replace(/\[DATA_INICIO\]/g, inicio)
@@ -1732,8 +1740,8 @@ async function generatePDF() {
           const key=`${yr}-${String(m).padStart(2,'0')}`;
           const val=monthly[key]?(type==='dep'?monthly[key].dep:monthly[key].ret):0;
           if(val>0){
-            const txt='R$\n'+val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-            const shortTxt=val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+            const dec=val%1===0?0:2;
+            const shortTxt=val.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2});
             sf(5.5,true,20,20,20);
             doc.text(shortTxt,ML+typeW+colW*(m-1)+colW/2,y+3.8,{align:'center'});
           } else {
@@ -1828,7 +1836,8 @@ async function generatePDF() {
   }
   y+=4;
 
-  // Visão geral das transações — use sectionBar
+  // Visão geral das transações — force new page
+  newPage();
   sectionBar('VISÃO GERAL DAS TRANSAÇÕES');
   const infoGrid=[['PAÍS:','BRASIL'],['ID DO GRUPO:',v('id_grupo')],['NOME:',v('nome').toUpperCase()],['SOBRENOME:',v('sobrenome').toUpperCase()],['OCUPAÇÃO:',v('atividade').toUpperCase()],['FONTE DE FUNDOS:',v('fonte_fundos').toUpperCase()]];
   for(let i=0;i<infoGrid.length;i+=2){
