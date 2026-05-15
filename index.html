@@ -1557,413 +1557,336 @@ async function mergePDFs(legajoBlob) {
 }
 
 // ══════════════════════════════════════════
-// PDF GENERATION — Calibri 9 uppercase style
+// PDF GENERATION — new clean layout
 // ══════════════════════════════════════════
 async function generatePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-  const W = 210, ML = 10, MR = 10, cw = W - ML - MR;
-  let y = 0;
+  const W=210, ML=10, MR=10, cw=W-ML-MR, BOTTOM=286;
+  let y=0;
 
-  const v = id => { const el=document.getElementById(id); return el ? (el.value||'') : ''; };
-  const fmtDate = (id) => { const val=v(id); if(!val) return '–'; try{const[yr,m,d]=val.split('-');return`${d}-${m}-${yr}`;}catch{return val;} };
-  const fmtNum = (id) => { const val=v(id); if(!val||isNaN(val)) return '–'; const n=parseFloat(val); const dec=n%1===0?0:2; return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2}); };
-  const fmtNumVal = (val) => { if(!val||isNaN(val)) return '–'; const n=parseFloat(val); const dec=n%1===0?0:2; return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2}); };
-  const nome = (v('nome')+' '+v('sobrenome')).toUpperCase();
+  const v = id => { const el=document.getElementById(id); return el?(el.value||''):''; };
+  const fmtDate = id => { const val=v(id); if(!val) return '–'; try{const[yr,m,d]=val.split('-');return`${d}-${m}-${yr}`;}catch{return val;} };
+  const fmtNum = id => { const val=v(id); if(!val||isNaN(val)) return '–'; const n=parseFloat(val); return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:n%1===0?0:2,maximumFractionDigits:2}); };
+  const fmtV = val => { if(!val||isNaN(val)) return '–'; const n=parseFloat(val); return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:n%1===0?0:2,maximumFractionDigits:2}); };
+  const fmtN = val => { if(!val||isNaN(Number(val))) return '–'; const n=parseFloat(val); return n%1===0?String(Math.round(n)):n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+
   const selectedTipos = getSelectedTipos();
-  const tipoCaso = selectedTipos[0] || '';
-  const isROS = selectedTipos.length > 0 && !selectedTipos.every(t => t === 'no_ros');
+  const isROS = selectedTipos.length>0 && !selectedTipos.every(t=>t==='no_ros');
 
-  // Font helpers — Calibri-like via helvetica
-  const setF = (sz=9, bold=false, color=[30,30,30]) => {
-    doc.setFont('helvetica', bold?'bold':'normal');
-    doc.setFontSize(sz);
-    doc.setTextColor(...color);
-  };
+  // ── helpers ──
+  const sf = (sz,bold,r,g,b) => { doc.setFont('helvetica',bold?'bold':'normal'); doc.setFontSize(sz); doc.setTextColor(r??20,g??20,b??20); };
 
-  function addPage() { doc.addPage(); y = 0; }
-  function checkPage(n=15) { if (y+n > 284) addPage(); }
+  function newPage() { doc.addPage(); y=0; addFooterPlaceholder(); }
+  function check(h) { if(y+h>BOTTOM) newPage(); }
 
-  // ── Orange section header bar (like the model)
+  function addFooterPlaceholder() {} // footers added at end
+
   function sectionBar(title) {
-    checkPage(10);
-    doc.setFillColor(255,69,0);
-    doc.rect(ML, y, cw, 8, 'F');
-    setF(9, true, [255,255,255]);
-    doc.text(title.toUpperCase(), ML+2, y+5.5);
-    y += 10;
+    check(10);
+    doc.setFillColor(255,69,0); doc.rect(ML,y,cw,7,'F');
+    sf(8.5,true,255,255,255); doc.text(title.toUpperCase(), ML+3, y+5);
+    y+=9;
   }
 
-  // ── Full-width info row (bold label left, value right) label col=55mm
-  function infoRow(label, value, labelW=55, rowH=6.5, grayBg=false) {
-    checkPage(rowH+1);
-    const vw = cw - labelW;
-    doc.setFillColor(grayBg ? 245 : 255, grayBg?245:255, grayBg?245:255);
-    doc.rect(ML, y, cw, rowH, 'F');
-    doc.setDrawColor(210,210,210);
-    doc.rect(ML, y, cw, rowH, 'S');
-    // label bg
-    doc.setFillColor(230,230,230);
-    doc.rect(ML, y, labelW, rowH, 'F');
-    setF(8, true, [40,40,40]);
-    doc.text(String(label||'').toUpperCase().substring(0,35), ML+2, y+rowH-1.8);
-    setF(8, false, [20,20,20]);
-    const valLines = doc.splitTextToSize(String(value||'–'), vw-3);
-    doc.text(valLines[0]||'–', ML+labelW+2, y+rowH-1.8);
-    y += rowH;
+  // Two-column client row: left half and right half each have label+value
+  function clientRow2(l1,v1,l2,v2) {
+    check(7);
+    const hw=cw/2, lw=30, H=6.5;
+    doc.setFillColor(255,255,255); doc.rect(ML,y,cw,H,'F');
+    doc.setDrawColor(210,210,210); doc.rect(ML,y,cw,H,'S');
+    // label cells
+    doc.setFillColor(225,225,225);
+    doc.rect(ML,y,lw,H,'F');
+    doc.rect(ML+hw,y,lw,H,'F');
+    // vertical divider
+    doc.setDrawColor(210,210,210); doc.line(ML+hw,y,ML+hw,y+H);
+    sf(7.5,true,50,50,50); doc.text(String(l1||'').toUpperCase(),ML+1.5,y+H-2);
+    sf(7.5,false,15,15,15); doc.text(String(v1||'–').substring(0,28),ML+lw+1.5,y+H-2);
+    sf(7.5,true,50,50,50); doc.text(String(l2||'').toUpperCase(),ML+hw+1.5,y+H-2);
+    sf(7.5,false,15,15,15); doc.text(String(v2||'–').substring(0,28),ML+hw+lw+1.5,y+H-2);
+    y+=H;
   }
 
-  // ── Two col info row
-  function twoInfo(l1,v1,l2,v2,lw=28) {
-    checkPage(7);
-    const hw=cw/2;
-    doc.setFillColor(255,255,255); doc.rect(ML,y,cw,6.5,'F');
-    doc.setDrawColor(210,210,210); doc.rect(ML,y,cw,6.5,'S');
-    doc.setFillColor(230,230,230);
-    doc.rect(ML,y,lw,6.5,'F');
-    doc.rect(ML+hw,y,lw,6.5,'F');
-    setF(8,true,[40,40,40]);
-    doc.text(String(l1||'').toUpperCase().substring(0,20), ML+1, y+4.7);
-    setF(8,false,[20,20,20]);
-    doc.text(String(v1||'–').substring(0,25), ML+lw+1, y+4.7);
-    setF(8,true,[40,40,40]);
-    doc.text(String(l2||'').toUpperCase().substring(0,20), ML+hw+1, y+4.7);
-    setF(8,false,[20,20,20]);
-    doc.text(String(v2||'–').substring(0,25), ML+hw+lw+1, y+4.7);
-    y += 6.5;
+  // Full-width row with wrapping value
+  function clientRowFull(label, value) {
+    const lw=38, H=7;
+    const valStr = String(value||'–');
+    const valLines = doc.splitTextToSize(valStr, cw-lw-3);
+    const rowH = Math.max(H, valLines.length*4.5+3);
+    check(rowH);
+    doc.setFillColor(255,255,255); doc.rect(ML,y,cw,rowH,'F');
+    doc.setDrawColor(210,210,210); doc.rect(ML,y,cw,rowH,'S');
+    doc.setFillColor(225,225,225); doc.rect(ML,y,lw,rowH,'F');
+    sf(7.5,true,50,50,50); doc.text(String(label||'').toUpperCase(),ML+1.5,y+rowH/2+1.5);
+    sf(7.5,false,15,15,15); doc.text(valLines,ML+lw+1.5,y+4.5);
+    y+=rowH;
   }
 
-  // ══════════════════════════════════════
-  // PAGE 1 — INFORMAÇÕES DE ANÁLISE + CLIENTE
-  // ══════════════════════════════════════
+  // Flag row (PEP / Sanções) — label left, green badge right
+  function flagRow(label, val) {
+    check(7);
+    const H=6.5;
+    doc.setFillColor(225,225,225); doc.rect(ML,y,cw,H,'F');
+    doc.setDrawColor(210,210,210); doc.rect(ML,y,cw,H,'S');
+    sf(7.5,true,50,50,50); doc.text(label.toUpperCase(), ML+2, y+H-2);
+    // green badge
+    doc.setFillColor(200,245,215); doc.roundedRect(ML+cw-32,y+1.2,30,4.2,1.5,1.5,'F');
+    sf(7,true,20,100,50); doc.text(val.toUpperCase(), ML+cw-17, y+H-2, {align:'center'});
+    y+=H;
+  }
 
-  // Orange top banner
-  doc.setFillColor(255,69,0);
-  doc.rect(0, 0, W, 20, 'F');
-  setF(15, true, [255,255,255]);
-  doc.text('BETWARRIOR', ML, 12);
-  setF(7.5, false, [255,220,200]);
-  doc.text('TRACK GAMING BRASIL LTDA · CNPJ/MF Nº 56.706.701/0001-03', ML, 17);
-  const rosLabel = isROS ? 'ROS' : 'NÃO ROS';
-  doc.setFillColor(isROS?200:29, isROS?30:185, isROS?30:84);
-  doc.roundedRect(W-ML-22,5,20,10,2,2,'F');
-  setF(7.5,true,[255,255,255]);
-  doc.text(rosLabel, W-ML-12, 11.5, {align:'center'});
-  y = 24;
+  // Alert row — full description
+  function alertRow(a) {
+    const codeW=22, H_base=7;
+    const descText = a.cod+' — '+a.desc;
+    const descLines = doc.splitTextToSize(descText.toUpperCase(), cw-codeW-4);
+    const H = Math.max(H_base, descLines.length*4+4);
+    check(H);
+    const rc = a.risk==='Alto'?[220,30,30]:a.risk==='Medio'?[200,120,0]:[100,100,100];
+    doc.setFillColor(...rc); doc.rect(ML,y,codeW,H,'F');
+    doc.setFillColor(252,252,252); doc.rect(ML+codeW,y,cw-codeW,H,'F');
+    doc.setDrawColor(210,210,210); doc.rect(ML,y,cw,H,'S');
+    sf(7,true,255,255,255); doc.text(a.cod,ML+codeW/2,y+H/2+1.5,{align:'center'});
+    sf(7,false,20,20,20); doc.text(descLines,ML+codeW+3,y+4.5);
+    y+=H+0.5;
+  }
 
-  // INFORMAÇÕES DE ANÁLISE
-  sectionBar('INFORMAÇÕES DE ANÁLISE 🔖');
-  // Header row
-  const cols4 = cw/4;
-  doc.setFillColor(30,30,30);
-  doc.rect(ML,y,cw,6,'F');
-  setF(7.5,true,[255,255,255]);
-  ['ESTADO','PERÍODO','NEGOCIOS','RISCO','ID'].forEach((h,i,arr) => {
-    const x = ML + (i * cw/5);
-    doc.text(h, x + (cw/5/2), y+4, {align:'center'});
-  });
-  y += 6;
+  // Ops table row
+  function opsRow(label, moeda, qty, amt, gray) {
+    check(7);
+    const H=6.5, cols=[cw*0.35,cw*0.15,cw*0.15,cw*0.35];
+    doc.setFillColor(gray?248:255,gray?248:255,gray?248:255);
+    doc.rect(ML,y,cw,H,'F'); doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,H,'S');
+    sf(7.5,false,20,20,20);
+    let tx=ML;
+    [label,moeda,qty,amt].forEach((val,i)=>{ doc.text(String(val||'–'),tx+cols[i]/2,y+H-2,{align:'center'}); tx+=cols[i]; });
+    y+=H;
+  }
+
+  // Busca row
+  function buscaRow(label, result, i) {
+    check(7);
+    const H=6.5;
+    doc.setFillColor(i%2?248:255,255,255); doc.rect(ML,y,cw,H,'F');
+    doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,H,'S');
+    sf(7.5,true,50,50,50); doc.text(label.toUpperCase(),ML+3,y+H-2);
+    const isPos=result==='Positivo';
+    const bgC=isPos?[253,220,220]:[200,245,215]; const txtC=isPos?[180,30,30]:[20,100,50];
+    doc.setFillColor(...bgC); doc.roundedRect(ML+cw-32,y+1.2,30,4.2,1.5,1.5,'F');
+    sf(7,true,...txtC); doc.text(result.toUpperCase(),ML+cw-17,y+H-2,{align:'center'});
+    y+=H;
+  }
+
+  // Monthly table
+  function monthlyTable(monthly) {
+    const allYears=[...new Set(Object.keys(monthly).map(k=>k.split('-')[0]))].map(Number).sort();
+    const years=allYears.length?allYears:[2025,2026];
+    if(!years.includes(2025)&&years[0]>2025) years.unshift(2025);
+    if(!years.includes(2026)&&Math.max(...years)<2026) years.push(2026);
+
+    const typeW=22, colW=(cw-typeW)/12;
+
+    years.forEach(yr=>{
+      check(36);
+      // Year bar
+      doc.setFillColor(30,30,30); doc.rect(ML,y,cw,6,'F');
+      sf(7.5,true,255,255,255); doc.text(String(yr)+' — BRL',ML+cw/2,y+4.3,{align:'center'}); y+=6;
+      // Month header
+      doc.setFillColor(200,200,200); doc.rect(ML,y,cw,5,'F');
+      sf(6,true,50,50,50);
+      doc.text('TIPO',ML+typeW/2,y+3.5,{align:'center'});
+      ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'].forEach((m,i)=>{
+        doc.text(m.toUpperCase(),ML+typeW+colW*i+colW/2,y+3.5,{align:'center'});
+      });
+      y+=5;
+      // Dep / Ret / Total rows
+      [['DEPÓSITOS','dep',[255,255,255]],['RETIRADAS','ret',[250,250,250]]].forEach(([label,type,bg])=>{
+        check(6); doc.setFillColor(...bg); doc.rect(ML,y,cw,5.5,'F');
+        doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,5.5,'S');
+        sf(7,true,50,50,50); doc.text(label,ML+typeW/2,y+3.8,{align:'center'});
+        sf(6,false,20,20,20);
+        for(let m=1;m<=12;m++){
+          const key=`${yr}-${String(m).padStart(2,'0')}`;
+          const val=monthly[key]?(type==='dep'?monthly[key].dep:monthly[key].ret):0;
+          if(val>0){
+            const txt=val%1===0?String(Math.round(val)):val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+            sf(6,true,20,20,20);
+            doc.text(txt,ML+typeW+colW*(m-1)+colW/2,y+3.8,{align:'center'});
+          } else {
+            sf(6,false,180,180,180); doc.text('–',ML+typeW+colW*(m-1)+colW/2,y+3.8,{align:'center'});
+          }
+        }
+        y+=5.5;
+      });
+      y+=3;
+    });
+  }
+
+  // ══════════════ RENDER ══════════════
+
+  // Top banner
+  doc.setFillColor(255,69,0); doc.rect(0,0,W,20,'F');
+  sf(14,true,255,255,255); doc.text('BETWARRIOR',ML,12);
+  sf(7,false,255,200,180); doc.text('TRACK GAMING BRASIL LTDA · CNPJ/MF Nº 56.706.701/0001-03',ML,17);
+  doc.setFillColor(isROS?180:20,isROS?20:160,isROS?20:70);
+  doc.roundedRect(W-MR-24,4,22,11,2,2,'F');
+  sf(8,true,255,255,255); doc.text(isROS?'ROS':'NÃO ROS',W-MR-13,11,{align:'center'});
+  y=23;
+
+  // Análise
+  sectionBar('INFORMAÇÕES DE ANÁLISE');
+  doc.setFillColor(30,30,30); doc.rect(ML,y,cw,6,'F');
+  sf(7,true,255,255,255);
+  const a5=['ESTADO','PERÍODO','NEGÓCIOS','RISCO','ID'];
+  a5.forEach((h,i)=>doc.text(h,ML+i*cw/5+cw/10,y+4,{align:'center'}));
+  y+=6;
   doc.setFillColor(255,255,255); doc.rect(ML,y,cw,7,'F');
   doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,7,'S');
-  const vals5 = [v('situacao_conta').toUpperCase(), (v('mes_ref')+' '+v('ano_ref')).toUpperCase(), 'BRASIL · ONLINE', v('nivel_risco').toUpperCase(), v('id_grupo')];
-  vals5.forEach((val,i) => {
-    setF(8, i===3, i===3 && v('nivel_risco')==='Alto' ? [220,30,30] : i===3 && v('nivel_risco')==='Medio' ? [200,100,0] : [20,20,20]);
-    doc.text(String(val||'–'), ML+(i*cw/5)+(cw/5/2), y+4.8, {align:'center'});
+  const rv=v('nivel_risco');
+  const v5=[v('situacao_conta'),(v('mes_ref')+' '+v('ano_ref')),'BRASIL · ONLINE',rv,v('id_grupo')];
+  v5.forEach((val,i)=>{
+    const isRisk=i===3;
+    const c=isRisk&&rv==='Alto'?[210,30,30]:isRisk&&rv==='Medio'?[180,90,0]:[20,20,20];
+    sf(8,isRisk,...c); doc.text(String(val||'–').toUpperCase(),ML+i*cw/5+cw/10,y+4.8,{align:'center'});
   });
-  y += 9;
+  y+=9;
 
-  // INFORMAÇÕES DO CLIENTE header
-  doc.setFillColor(255,69,0); doc.rect(ML,y,cw,7,'F');
-  setF(9,true,[255,255,255]); doc.text('INFORMAÇÕES DO CLIENTE', ML+cw/2, y+5, {align:'center'}); y+=7;
+  // Cliente header
+  doc.setFillColor(255,69,0); doc.rect(ML,y,cw,6.5,'F');
+  sf(8,true,255,255,255); doc.text('INFORMAÇÕES DO CLIENTE',ML+cw/2,y+4.5,{align:'center'}); y+=6.5;
 
-  // Client data grid
-  const lw = 28;
-  twoInfo('SOBRENOME', v('sobrenome').toUpperCase(), 'NOME', v('nome').toUpperCase());
-  twoInfo('CPF', v('cpf'), 'F. DE NASCIMENTO', fmtDate('data_nasc'));
-  twoInfo('NACIONALIDADE', (v('nacionalidade')||'Brasil').toUpperCase(), 'PAÍS DE RESIDÊNCIA', (v('pais_residencia')||'Brasil').toUpperCase());
-  twoInfo('ESTADO CIVIL', (v('estado_civil')||'–').toUpperCase(), 'ESTADO (UF)', v('estado_uf'));
-  infoRow('ENDEREÇO', (v('endereco')||'–').toUpperCase() + (v('localidade')?', '+v('localidade').toUpperCase():'') + (v('cep')?'. CEP '+v('cep'):''));
-  twoInfo('ATIVIDADE', (v('atividade')||'–').toUpperCase(), 'FONTE DE FUNDOS', (v('fonte_fundos')||'–').toUpperCase());
-  twoInfo('DATA CADASTRO', fmtDate('data_cadastro'), 'SITUAÇÃO CONTA', (v('situacao_conta')||'–').toUpperCase());
+  clientRow2('SOBRENOME',v('sobrenome').toUpperCase(),'NOME',v('nome').toUpperCase());
+  clientRow2('CPF',v('cpf'),'F. DE NASCIMENTO',fmtDate('data_nasc'));
+  clientRow2('NACIONALIDADE',(v('nacionalidade')||'Brasil').toUpperCase(),'PAÍS DE RESIDÊNCIA',(v('pais_residencia')||'Brasil').toUpperCase());
+  clientRow2('ESTADO CIVIL',(v('estado_civil')||'–').toUpperCase(),'ESTADO (UF)',v('estado_uf'));
+  clientRowFull('ENDEREÇO',(v('endereco')||'–').toUpperCase()+(v('localidade')?', '+v('localidade').toUpperCase():'')+(v('cep')?' — CEP '+v('cep'):''));
+  clientRow2('ATIVIDADE',(v('atividade')||'–').toUpperCase(),'FONTE DE FUNDOS',(v('fonte_fundos')||'–').toUpperCase());
+  clientRow2('DATA CADASTRO',fmtDate('data_cadastro'),'SITUAÇÃO CONTA',(v('situacao_conta')||'–').toUpperCase());
+  y+=1;
+  flagRow('CONDIÇÃO — PESSOA POLITICAMENTE EXPOSTA','PEP NÃO');
+  flagRow('LISTAS DE SANÇÕES / TERRORISTAS','NÃO');
+  y+=4;
 
-  // PEP / Sanctions
-  y += 2;
-  doc.setFillColor(220,220,220); doc.rect(ML,y,cw,6,'F');
-  doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,6,'S');
-  setF(7.5,true,[40,40,40]);
-  doc.text('CONDIÇÃO - PESSOA POLITICAMENTE EXPOSTA', ML+2, y+4.2);
-  setF(7.5,false,[20,20,20]); doc.text('PEP NÃO', ML+cw-20, y+4.2);
-  y += 6;
-  doc.setFillColor(220,220,220); doc.rect(ML,y,cw,6,'F');
-  doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,6,'S');
-  setF(7.5,true,[40,40,40]);
-  doc.text('LISTAS DE SANÇÕES / TERRORISTAS', ML+2, y+4.2);
-  setF(7.5,false,[20,20,20]); doc.text('NÃO', ML+cw-10, y+4.2);
-  y += 8;
-
-  // ALERTAS
-  const alertasSel = [];
-  Object.values(ALERTAS).flat().forEach(a => { const chk=document.getElementById('alrt_'+a.cod); if(chk&&chk.checked) alertasSel.push(a); });
+  // Alertas
+  const alertasSel=[];
+  Object.values(ALERTAS).flat().forEach(a=>{const chk=document.getElementById('alrt_'+a.cod);if(chk&&chk.checked)alertasSel.push(a);});
   sectionBar('ALERTAS');
-  if (!alertasSel.length) {
-    setF(8,false,[130,130,130]); doc.text('Nenhum alerta selecionado', ML+2, y+5); y+=10;
-  } else {
-    alertasSel.forEach(a => {
-      checkPage(8);
-      const rc = a.risk==='Alto'?[220,30,30]:a.risk==='Medio'?[200,120,0]:[100,100,100];
-      doc.setFillColor(...rc); doc.roundedRect(ML,y+0.5,18,6,1,1,'F');
-      setF(6.5,true,[255,255,255]); doc.text(a.cod,ML+9,y+4.5,{align:'center'});
-      setF(7.5,false,[30,30,30]);
-      const lines=doc.splitTextToSize(a.desc.toUpperCase(),cw-22);
-      doc.text(lines[0],ML+21,y+4.5);
-      y+=7;
-    });
-  }
-  y += 3;
+  if(!alertasSel.length){sf(8,false,130,130,130);doc.text('Nenhum alerta selecionado',ML+2,y+5);y+=10;}
+  else alertasSel.forEach(alertRow);
+  y+=4;
 
-  // OPERAÇÕES
-  sectionBar('OPERAÇÕES 💾');
-  // Summary table header
-  const tHeaders = ['CARA','MOEDA','TOTAL #','QUANTIA $'];
-  const tWidths = [40,20,20,cw-80];
+  // Operações
+  sectionBar('OPERAÇÕES');
   doc.setFillColor(30,30,30); doc.rect(ML,y,cw,6,'F');
-  setF(7,true,[255,255,255]);
+  sf(7,true,255,255,255);
+  const oCols=[cw*0.35,cw*0.15,cw*0.15,cw*0.35];
   let tx=ML;
-  tHeaders.forEach((h,i)=>{ doc.text(h,tx+tWidths[i]/2,y+4.5,{align:'center'}); tx+=tWidths[i]; });
+  ['CARA','MOEDA','TOTAL #','QUANTIA $'].forEach((h,i)=>{doc.text(h,tx+oCols[i]/2,y+4.2,{align:'center'});tx+=oCols[i];});
   y+=6;
+  opsRow('DEPÓSITOS','BRL',fmtN(v('qtd_dep')),fmtV(v('val_dep')),false);
+  opsRow('RETIRADAS','BRL',fmtN(v('qtd_ret')),fmtV(v('val_ret')),true);
+  y+=2;
+  doc.setFillColor(255,69,0); doc.rect(ML,y,cw,6,'F');
+  sf(7.5,true,255,255,255); doc.text('AVALIAÇÃO DE RISCO / RESUMO DO JOGADOR',ML+cw/2,y+4.2,{align:'center'}); y+=8;
 
-  [['DEPÓSITOS','BRL',v('qtd_dep'),v('val_dep')],['RETIRADAS','BRL',v('qtd_ret'),v('val_ret')]].forEach((row,ri) => {
-    checkPage(7); doc.setFillColor(ri%2?248:255,ri%2?248:255,ri%2?248:255);
-    doc.rect(ML,y,cw,6.5,'F'); doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,6.5,'S');
-    setF(8,false,[20,20,20]);
-    tx=ML;
-    [row[0],row[1],row[2]||'–',fmtNumVal(row[3])].forEach((val,i)=>{ doc.text(String(val),tx+tWidths[i]/2,y+4.5,{align:'center'}); tx+=tWidths[i]; });
-    y+=6.5;
-  });
-
-  // Avaliação de risco sub-header
-  y+=2; doc.setFillColor(255,69,0); doc.rect(ML,y,cw,6,'F');
-  setF(8,true,[255,255,255]); doc.text('AVALIAÇÃO DE RISCO / RESUMO DO JOGADOR', ML+cw/2, y+4.3, {align:'center'}); y+=8;
-
-  // Summary text (narrative)
-  const texto = v('texto_narrativo');
-  if (texto) {
-    setF(8,false,[20,20,20]);
-    const paragraphs = texto.split('\n\n').filter(p=>p.trim());
-    paragraphs.forEach(para => {
-      const lines = doc.splitTextToSize(para.trim(), cw);
-      checkPage(lines.length*4+5);
-      doc.text(lines,ML,y); y+=lines.length*4+3;
+  // Narrative — proper paragraph breaks, check page before each paragraph
+  const texto=v('texto_narrativo');
+  if(texto){
+    const paras=texto.split('\n\n').filter(p=>p.trim());
+    paras.forEach(para=>{
+      const lines=doc.splitTextToSize(para.trim(),cw);
+      const h=lines.length*4.2+3;
+      check(h);
+      sf(7.5,false,20,20,20); doc.text(lines,ML,y); y+=h;
     });
   }
-  y+=3;
+  y+=4;
 
-  // VISÃO GERAL DAS TRANSAÇÕES
-  checkPage(20);
-  setF(9,true,[30,30,30]); doc.text('VISÃO GERAL DAS TRANSAÇÕES',ML+cw/2,y,{align:'center'}); y+=5;
-
-  // Client info block
-  const infoItems = [
-    ['PAÍS:','BRASIL'], ['ID DO GRUPO:',v('id_grupo')], ['NOME:',v('nome').toUpperCase()],
-    ['SOBRENOME:',v('sobrenome').toUpperCase()], ['OCUPAÇÃO:',v('atividade').toUpperCase()], ['FONTE DE FUNDOS:',v('fonte_fundos').toUpperCase()]
-  ];
-  infoItems.forEach(([l,vv]) => {
-    checkPage(5); setF(8,true,[30,30,30]); doc.text(l,ML,y);
-    setF(8,false,[30,30,30]); doc.text(vv||'–',ML+35,y); y+=4.5;
-  });
-  y+=3;
-
-  // Annual totals
-  const yr2025dep = Object.keys(window.monthTableData||{}).filter(k=>k.startsWith('2025')).reduce((s,k)=>s+(window.monthTableData[k].dep||0),0);
-  const yr2025ret = Object.keys(window.monthTableData||{}).filter(k=>k.startsWith('2025')).reduce((s,k)=>s+(window.monthTableData[k].ret||0),0);
-  const yr2026dep = Object.keys(window.monthTableData||{}).filter(k=>k.startsWith('2026')).reduce((s,k)=>s+(window.monthTableData[k].dep||0),0);
-  const yr2026ret = Object.keys(window.monthTableData||{}).filter(k=>k.startsWith('2026')).reduce((s,k)=>s+(window.monthTableData[k].ret||0),0);
-
-  checkPage(30);
-  // BRL header
-  setF(8,true,[30,30,30]);
-  doc.text('BRL',ML+cw/2,y,{align:'center'}); y+=4;
-  // Year header
-  doc.setFillColor(30,30,30); doc.rect(ML,y,cw,6,'F');
-  setF(8,true,[255,255,255]);
-  doc.text('ANUAL',ML+20,y+4.2);
-  doc.text('2025',ML+cw*0.35,y+4.2,{align:'center'});
-  doc.text('2026',ML+cw*0.75,y+4.2,{align:'center'});
-  y+=6;
-
-  [['Depósitos',yr2025dep,yr2026dep],['Retiradas',yr2025ret,yr2026ret]].forEach((row,ri)=>{
-    checkPage(6); doc.setFillColor(ri%2?248:255,255,255);
-    doc.rect(ML,y,cw,5.5,'F'); doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,5.5,'S');
-    setF(8,false,[20,20,20]);
-    doc.text(row[0],ML+2,y+3.8);
-    const d1=row[1]%1===0?0:2,d2=row[2]%1===0?0:2; doc.text(row[1]>0?'$ '+row[1].toLocaleString('pt-BR',{minimumFractionDigits:d1,maximumFractionDigits:2}):'–',ML+cw*0.35,y+3.8,{align:'center'});
-    doc.text(row[2]>0?'$ '+row[2].toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'–',ML+cw*0.75,y+3.8,{align:'center'});
-    y+=5.5;
-  });
-  const totalAl = yr2025dep+yr2025ret, totalBl=yr2026dep+yr2026ret;
-  doc.setFillColor(40,40,40); doc.rect(ML,y,cw,5.5,'F');
-  setF(8,true,[255,255,255]);
-  doc.text('TOTAL',ML+2,y+3.8);
-  doc.text(totalAl>0?'BRL $ '+totalAl.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'–',ML+cw*0.35,y+3.8,{align:'center'});
-  doc.text(totalBl>0?'BRL $ '+totalBl.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'–',ML+cw*0.75,y+3.8,{align:'center'});
-  y+=7;
-
-  // Monthly breakdown — from parsed data
-  // Read from parsed data or fall back to DOM inputs
-  const monthly = (window.monthTableData && Object.keys(window.monthTableData).length > 0)
-    ? window.monthTableData
-    : (() => {
-        const m = {};
-        [2025,2026].forEach(yr => {
-          for (let mo=1; mo<=12; mo++) {
-            const dep = parseFloat(document.getElementById(`dep_${yr}_${mo}`)?.value||0)||0;
-            const ret = parseFloat(document.getElementById(`ret_${yr}_${mo}`)?.value||0)||0;
-            if (dep>0||ret>0) { const k=`${yr}-${String(mo).padStart(2,'0')}`; m[k]={dep,ret}; }
-          }
-        });
-        return m;
-      })();
-  const allYears = [...new Set(Object.keys(monthly).map(k=>k.split('-')[0]))].map(Number).sort();
-  const tableYears = allYears.length ? allYears : [2025,2026];
-  if (!tableYears.includes(2025)) tableYears.unshift(2025);
-  if (!tableYears.includes(2026) && Math.max(...tableYears) < 2026) tableYears.push(2026);
-
-  const colW = cw/13, typeColW = cw - 12*colW;
-  tableYears.forEach(yr => {
-    checkPage(32);
-    // Year header
-    doc.setFillColor(30,30,30); doc.rect(ML,y,cw,6,'F');
-    setF(8,true,[255,255,255]); doc.text(String(yr),ML+cw/2,y+4.3,{align:'center'}); y+=6;
-    // Month header
-    doc.setFillColor(200,200,200); doc.rect(ML,y,cw,5,'F');
-    setF(7,true,[30,30,30]);
-    doc.text('MÊS',ML+typeColW/2,y+3.5,{align:'center'});
-    MONTHS.forEach((m,i) => doc.text(m.toUpperCase(),ML+typeColW+colW*i+colW/2,y+3.5,{align:'center'}));
-    y+=5;
-    // Monthly rows
-    [['Depósitos','dep'],['Retiradas','ret']].forEach(([label,type],ri)=>{
-      checkPage(6); doc.setFillColor(ri===0?255:250,ri===0?255:250,ri===0?255:250);
-      doc.rect(ML,y,cw,5.5,'F'); doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,5.5,'S');
-      setF(7,true,[40,40,40]); doc.text(label.toUpperCase(),ML+typeColW/2,y+3.8,{align:'center'});
-      setF(6.5,false,[20,20,20]);
-      for (let m=1;m<=12;m++) {
-        const key=`${yr}-${String(m).padStart(2,'0')}`;
-        const val = monthly[key] ? (type==='dep'?monthly[key].dep:monthly[key].ret) : 0;
-        const dec=val%1===0?0:2; const txt = val>0 ? '$ '+val.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2}) : '–';
-        doc.text(txt, ML+typeColW+colW*(m-1)+colW/2, y+3.8, {align:'center'});
-      }
-      y+=5.5;
-    });
-    // Month total row
-    doc.setFillColor(230,230,230); doc.rect(ML,y,cw,5.5,'F'); doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,5.5,'S');
-    setF(7,true,[40,40,40]); doc.text('TOTAL',ML+typeColW/2,y+3.8,{align:'center'});
-    setF(6.5,false,[20,20,20]);
-    for (let m=1;m<=12;m++) {
-      const key=`${yr}-${String(m).padStart(2,'0')}`;
-      const total = monthly[key] ? (monthly[key].dep||0)+(monthly[key].ret||0) : 0;
-      doc.text(total>0?'$ '+total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'–', ML+typeColW+colW*(m-1)+colW/2, y+3.8, {align:'center'});
+  // Visão geral das transações — info block
+  check(30);
+  sf(8.5,true,30,30,30); doc.text('VISÃO GERAL DAS TRANSAÇÕES',ML+cw/2,y,{align:'center'}); y+=5;
+  const infoGrid=[['PAÍS:','BRASIL'],['ID DO GRUPO:',v('id_grupo')],['NOME:',v('nome').toUpperCase()],['SOBRENOME:',v('sobrenome').toUpperCase()],['OCUPAÇÃO:',v('atividade').toUpperCase()],['FONTE DE FUNDOS:',v('fonte_fundos').toUpperCase()]];
+  for(let i=0;i<infoGrid.length;i+=2){
+    check(5);
+    sf(7.5,true,40,40,40); doc.text(infoGrid[i][0],ML,y);
+    sf(7.5,false,20,20,20); doc.text(infoGrid[i][1]||'–',ML+34,y);
+    if(infoGrid[i+1]){
+      sf(7.5,true,40,40,40); doc.text(infoGrid[i+1][0],ML+cw/2,y);
+      sf(7.5,false,20,20,20); doc.text(infoGrid[i+1][1]||'–',ML+cw/2+34,y);
     }
-    y+=7;
-  });
+    y+=4.5;
+  }
+  y+=4;
 
-  // BUSCAS DE RISCO
-  addPage(); y = 6;
-  sectionBar('BUSCAS DE RISCO 🔍');
-  const buscas = [
-    ['OFAC', document.querySelector('input[name="r_ofac"]:checked')?.value||'Negativo'],
-    ['PEP BRASIL', document.querySelector('input[name="r_pep"]:checked')?.value||'Negativo'],
-    ['TERRORISMO / INTERNACIONAIS', document.querySelector('input[name="r_terr"]:checked')?.value||'Negativo'],
-    ['GAFI (JURISDIÇÕES MONITORADAS)', document.querySelector('input[name="r_gafi"]:checked')?.value||'Negativo'],
-    ['RFB (REGIME FISCAL PREFERENCIAL)', document.querySelector('input[name="r_rfb"]:checked')?.value||'Negativo'],
-    ['MÍDIA ADVERSA', document.querySelector('input[name="r_media"]:checked')?.value||'Negativo'],
-  ];
-  buscas.forEach((b,i)=>{
-    checkPage(8); doc.setFillColor(i%2?248:255,255,255);
-    doc.rect(ML,y,cw,7,'F'); doc.setDrawColor(200,200,200); doc.rect(ML,y,cw,7,'S');
-    setF(8,true,[40,40,40]); doc.text(b[0],ML+3,y+4.8);
-    const isPos=b[1]==='Positivo';
-    doc.setFillColor(isPos?220:29,isPos?30:185,isPos?30:84);
-    doc.roundedRect(W-MR-22,y+1.5,20,4.5,1.5,1.5,'F');
-    setF(7,true,[255,255,255]); doc.text(b[1].toUpperCase(),W-MR-12,y+4.5,{align:'center'});
-    y+=7;
-  });
-  if (v('data_busca')) { y+=3; twoInfo('DATA DA BUSCA',fmtDate('data_busca'),'','')}
-  if (v('obs_buscas')) {
-    y+=3; checkPage(20); setF(8,true,[40,40,40]); doc.text('OBSERVAÇÕES:',ML,y); y+=5;
-    setF(7.5,false,[20,20,20]);
-    const obsL=doc.splitTextToSize(v('obs_buscas'),cw); doc.text(obsL,ML,y); y+=obsL.length*4+4;
+  // Monthly table
+  const monthly=(window.monthTableData&&Object.keys(window.monthTableData).length>0)
+    ?window.monthTableData
+    :(()=>{const m={};[2025,2026].forEach(yr=>{for(let mo=1;mo<=12;mo++){const dep=parseFloat(document.getElementById(`dep_${yr}_${mo}`)?.value||0)||0;const ret=parseFloat(document.getElementById(`ret_${yr}_${mo}`)?.value||0)||0;if(dep>0||ret>0){const k=`${yr}-${String(mo).padStart(2,'0')}`;m[k]={dep,ret};}}});return m;})();
+
+  monthlyTable(monthly);
+
+  // Buscas
+  sectionBar('BUSCAS DE RISCO');
+  const buscas=[['OFAC',document.querySelector('input[name="r_ofac"]:checked')?.value||'Negativo'],['PEP BRASIL',document.querySelector('input[name="r_pep"]:checked')?.value||'Negativo'],['TERRORISMO / INTERNACIONAIS',document.querySelector('input[name="r_terr"]:checked')?.value||'Negativo'],['GAFI (JURISDIÇÕES MONITORADAS)',document.querySelector('input[name="r_gafi"]:checked')?.value||'Negativo'],['RFB (REGIME FISCAL PREFERENCIAL)',document.querySelector('input[name="r_rfb"]:checked')?.value||'Negativo'],['MÍDIA ADVERSA',document.querySelector('input[name="r_media"]:checked')?.value||'Negativo']];
+  buscas.forEach((b,i)=>buscaRow(b[0],b[1],i));
+  if(v('data_busca')){y+=2;check(7);sf(7.5,true,50,50,50);doc.text('DATA DA BUSCA:',ML+2,y+4.5);sf(7.5,false,20,20,20);doc.text(fmtDate('data_busca'),ML+34,y+4.5);y+=7;}
+  if(v('obs_buscas')){y+=2;check(15);sf(7.5,true,50,50,50);doc.text('OBSERVAÇÕES:',ML+2,y);y+=4;const oL=doc.splitTextToSize(v('obs_buscas'),cw);check(oL.length*4+3);sf(7.5,false,20,20,20);doc.text(oL,ML+2,y);y+=oL.length*4+4;}
+
+  const repPrevEl=document.querySelector('input[name="rep_previo"]:checked');
+  if(repPrevEl&&repPrevEl.value==='si'){
+    y+=3;check(14);sf(8,true,180,30,30);doc.text('COMUNICAÇÃO PRÉVIA AO COAF:',ML,y);y+=5;
+    clientRow2('NÚMERO DE ORIGEM',v('num_origem'),'NÚMERO COAF',v('num_coaf'));y+=3;
   }
 
-  // Reporte previo
-  const repPrevEl = document.querySelector('input[name="rep_previo"]:checked');
-  if (repPrevEl && repPrevEl.value==='si') {
-    y+=4; checkPage(14); setF(8,true,[200,30,30]);
-    doc.text('COMUNICAÇÃO PRÉVIA AO COAF:',ML,y); y+=5;
-    twoInfo('NÚMERO DE ORIGEM',v('num_origem'),'NÚMERO COAF',v('num_coaf'));
-    y+=3;
-  }
+  // Procedimento
+  y+=4; sectionBar('PROCEDIMENTO INTERNO');
+  clientRow2('DATA DE INÍCIO',fmtDate('data_inicio'),'DATA DE TÉRMINO',fmtDate('data_fim'));
+  clientRowFull('ANALISTA RESPONSÁVEL',v('analista'));
+  y+=4;
 
-  // PROCEDIMENTO
-  y+=4; checkPage(25); sectionBar('PROCEDIMENTO INTERNO');
-  twoInfo('DATA DE INÍCIO',fmtDate('data_inicio'),'DATA DE TÉRMINO',fmtDate('data_fim'));
-  infoRow('ANALISTA RESPONSÁVEL',v('analista'));
-  y+=6;
-
-  // RESULTADO
-  checkPage(18);
-  const resBg = isROS ? [253,236,236] : [240,255,244];
-  const resBdr = isROS ? [220,30,30] : [29,185,84];
-  doc.setFillColor(...resBg); doc.rect(ML,y,cw,14,'F');
-  doc.setDrawColor(...resBdr); doc.rect(ML,y,cw,14,'S');
-  setF(8.5,true,[...resBdr]);
+  // Resultado
+  check(16);
+  const resBg=isROS?[253,230,230]:[230,248,235]; const resBdr=isROS?[200,30,30]:[20,140,60];
+  doc.setFillColor(...resBg); doc.rect(ML,y,cw,13,'F');
+  doc.setDrawColor(...resBdr); doc.rect(ML,y,cw,13,'S');
   const resMsg=isROS?'Após análise, constatou-se que HÁ EVIDÊNCIAS que justifiquem a comunicação ao SISCOAF.':'Após análise, constatou-se que NÃO HÁ EVIDÊNCIAS para comunicação ao SISCOAF.';
-  const resL=doc.splitTextToSize(resMsg,cw-6); doc.text(resL,ML+3,y+5); y+=17;
-  setF(8,true,[40,40,40]); doc.text('DATA DO RELATÓRIO: '+fmtDate('data_relatorio'),ML,y); y+=8;
+  const resL=doc.splitTextToSize(resMsg,cw-6);
+  sf(8,true,...resBdr); doc.text(resL,ML+3,y+5); y+=16;
+  sf(7.5,true,40,40,40); doc.text('DATA DO RELATÓRIO: '+fmtDate('data_relatorio'),ML,y); y+=8;
 
-  // ── EMBED IMAGES (JPG/PNG) — PDFs are merged separately by mergePDFs() ──
-  const imgFileLists = ['list-foto','list-doc','list-buscas','list-outros'];
-  let hasImages = false;
-  for (const listId of imgFileLists) {
-    for (const file of (fileStorage[listId]||[])) {
-      if (file.data && file.type && file.type.startsWith('image/')) { hasImages=true; break; }
-    }
-    if (hasImages) break;
-  }
-  if (hasImages) {
-    addPage(); y=6;
-    sectionBar('DOCUMENTAÇÃO');
-    for (const listId of imgFileLists) {
-      for (const file of (fileStorage[listId]||[])) {
-        if (!file.data || !file.type || !file.type.startsWith('image/')) continue;
-        try {
-          setF(7,true,[80,80,80]); doc.text(file.name.toUpperCase(), ML+2, y); y+=4;
-          const img = new Image();
-          img.src = file.data;
-          await new Promise(r=>{ img.onload=r; img.onerror=r; });
-          const maxW=cw, maxH=252;
-          const iw=img.naturalWidth||200, ih=img.naturalHeight||200;
-          const ratio = Math.min(maxW/iw, maxH/ih);
-          const dw=iw*ratio, dh=ih*ratio;
-          if (y + dh > 282) { addPage(); y=6; }
-          doc.addImage(file.data, file.type==='image/png'?'PNG':'JPEG', ML+(cw-dw)/2, y, dw, dh);
-          y += dh + 8;
-        } catch(e) { console.warn('Could not embed image:', file.name, e); }
-      }
+  // Images
+  const imgLists=['list-foto','list-doc','list-buscas','list-outros'];
+  let firstImg=true;
+  for(const listId of imgLists){
+    for(const file of(fileStorage[listId]||[])){
+      if(!file.data||!file.type||!file.type.startsWith('image/'))continue;
+      try{
+        if(firstImg){newPage();sectionBar('DOCUMENTAÇÃO');firstImg=false;}
+        sf(7,true,80,80,80); doc.text(file.name.toUpperCase(),ML+2,y);y+=4;
+        const img=new Image(); img.src=file.data;
+        await new Promise(r=>{img.onload=r;img.onerror=r;});
+        const iw=img.naturalWidth||200,ih=img.naturalHeight||200;
+        const ratio=Math.min(cw/iw,250/ih);
+        const dw=iw*ratio,dh=ih*ratio;
+        if(y+dh>BOTTOM){newPage();}
+        doc.addImage(file.data,file.type==='image/png'?'PNG':'JPEG',ML+(cw-dw)/2,y,dw,dh);
+        y+=dh+8;
+      }catch(e){console.warn('img error',file.name,e);}
     }
   }
 
-  // Footer all pages
-  const totalPages = doc.internal.getNumberOfPages();
-  for (let p=1;p<=totalPages;p++) {
+  // Footer on all pages
+  const totalPages=doc.internal.getNumberOfPages();
+  for(let p=1;p<=totalPages;p++){
     doc.setPage(p);
-    setF(6.5,false,[160,160,160]);
-    doc.text('BetWarrior · Track Gaming Brasil Ltda · CNPJ 56.706.701/0001-03 · Confidencial · AML/PLD', W/2, 292, {align:'center'});
-    doc.text(`Página ${p} de ${totalPages}`, W-MR, 292, {align:'right'});
+    sf(6,false,160,160,160);
+    doc.text('BetWarrior · Track Gaming Brasil Ltda · CNPJ 56.706.701/0001-03 · Confidencial · AML/PLD',W/2,292,{align:'center'});
+    doc.text(`Página ${p} de ${totalPages}`,W-MR,292,{align:'right'});
   }
 
   return doc.output('blob');
 }
-
 
 // ══════════════════════════════════════════
 // WORD GENERATION — Segoe UI 10pt, format matches model
