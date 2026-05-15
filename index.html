@@ -329,6 +329,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
           <option>Poupança Laboral</option>
           <option>Poupança de Aposentadoria</option>
           <option>Salário</option>
+          <option>Indenização Trabalhista</option>
           <option>Renda de Empresa</option>
           <option>Renda de Investimentos</option>
           <option>Herança / Doação</option>
@@ -1278,8 +1279,27 @@ async function parseDetalle(input) {
 
       const key = `${yr}-${String(mo).padStart(2,'0')}`;
       if (!monthly[key]) monthly[key] = {dep:0, ret:0};
-      const dep = parseFloat(String(r['Deposit Local Curr']||'0').replace(/[^0-9.-]/g,'')) || 0;
-      const ret = parseFloat(String(r['Withdrawal Local Curr']||'0').replace(/[^0-9.-]/g,'')) || 0;
+      const _parseNum = s => {
+        const str = String(s||'0').trim();
+        if(!str || str==='-') return 0;
+        // If has both . and , → dot=thousands or comma=thousands
+        // SheetJS with raw:false always uses JS locale: comma=thousands, dot=decimal
+        // e.g. "2,540.00" → remove commas → "2540.00"
+        // e.g. "2.540,00" → remove dots → replace comma → "2540.00"
+        if(str.includes(',') && str.includes('.')) {
+          const dotIdx = str.lastIndexOf('.');
+          const commaIdx = str.lastIndexOf(',');
+          if(commaIdx > dotIdx) { // comma is decimal separator
+            return parseFloat(str.replace(/\./g,'').replace(',','.')) || 0;
+          } else { // dot is decimal separator
+            return parseFloat(str.replace(/,/g,'')) || 0;
+          }
+        }
+        if(str.includes(',') && !str.includes('.')) return parseFloat(str.replace(',','.')) || 0;
+        return parseFloat(str) || 0;
+      };
+      const dep = (typeof r['Deposit Local Curr']==='number') ? r['Deposit Local Curr'] : _parseNum(r['Deposit Local Curr']);
+      const ret = (typeof r['Withdrawal Local Curr']==='number') ? r['Withdrawal Local Curr'] : _parseNum(r['Withdrawal Local Curr']);
       monthly[key].dep += dep;
       monthly[key].ret += ret;
       parsed++;
@@ -1909,15 +1929,14 @@ async function generatePDF() {
   row2('Ocupação',v('atividade')||'–','Fonte de Fundos',v('fonte_fundos')||'–');
   y+=4;
 
-  // Siempre leer los inputs actuales (reflejan ediciones manuales del usuario)
+  // Siempre leer inputs actuales (refleja ediciones manuales)
   const monthly=(()=>{const m={};
     document.querySelectorAll('[id^="dep_"],[id^="ret_"]').forEach(el=>{
-      const parts=el.id.split('_'); const type=parts[0]; const yr=parts[1]; const mo=parts[2];
+      const parts=el.id.split('_');const type=parts[0];const yr=parts[1];const mo=parts[2];
       const val=parseFloat(el.value||0)||0;
       if(val>0){const k=`${yr}-${String(mo).padStart(2,'0')}`;
-        if(!m[k])m[k]={dep:0,ret:0}; m[k][type]+=val;}
-    });
-    return m;
+        if(!m[k])m[k]={dep:0,ret:0};m[k][type]+=val;}
+    });return m;
   })();
   monthlyTable(monthly);
 
@@ -2161,7 +2180,7 @@ async function generateWord() {
           columnWidths: [3500, 5526],
           rows: [
             row2('Data de início do procedimento:', fmtDate('data_inicio')),
-            row2('Data de término do procedimento:', fmtDate('data_fim')),
+            row2('Data de término do procedimento:', fmtDate('data_relatorio')),
             row2('Profissionais envolvidos na análise e respectivos cargos:', v('analista') || 'Analista'),
           ]
         }),
