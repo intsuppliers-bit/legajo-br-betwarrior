@@ -336,7 +336,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       </div>
       <div class="field">
         <label>Situação da Conta <span class="req">*</span></label>
-        <select id="situacao_conta" required
+        <select id="situacao_conta" required>
           <option value="">Selecionar</option>
           <option>Active</option><option>Suspensa</option><option>Bloqueada</option><option>Cancelada</option>
         </select>
@@ -344,7 +344,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       </div>
       <div class="field">
         <label>Nível de Risco <span class="req">*</span></label>
-        <select id="nivel_risco" required
+        <select id="nivel_risco" required>
           <option value="">Selecionar</option>
           <option value="Alto">Alto</option>
           <option value="Medio">Médio</option>
@@ -379,7 +379,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="grid-3">
       <div class="field">
         <label>Mês de referência <span class="req">*</span></label>
-        <select id="mes_ref" required
+        <select id="mes_ref" required>
           <option value="">Selecionar mês</option>
           <option value="Janeiro">Janeiro</option><option value="Fevereiro">Fevereiro</option>
           <option value="Março">Março</option><option value="Abril">Abril</option>
@@ -392,7 +392,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       </div>
       <div class="field">
         <label>Ano <span class="req">*</span></label>
-        <select id="ano_ref" required
+        <select id="ano_ref" required>
           <option value="">Selecionar</option>
           <option>2024</option><option>2025</option><option selected>2026</option><option>2027</option>
         </select>
@@ -483,18 +483,22 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <label>Prêmios (R$)</label>
         <input type="number" id="premios_periodo" placeholder="0.00" min="0" step="0.01">
       </div>
-      <div class="field">
-        <label>% Cassino</label>
-        <input type="number" id="pct_casino" placeholder="0" min="0" max="100">
-      </div>
-      <div class="field">
-        <label>% Esportivo</label>
-        <input type="number" id="pct_esportivo" placeholder="0" min="0" max="100">
-      </div>
     </div>
     <div id="mensual-parsed-ok" style="display:none;margin-top:10px" class="inline-alert" style="background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
       <span id="mensual-parsed-msg"></span>
+    </div>
+    <!-- % siempre visible -->
+    <div class="grid-2" style="margin-top:14px">
+      <div class="field">
+        <label>% Cassino</label>
+        <input type="number" id="pct_casino" placeholder="Ex: 95" min="0" max="100">
+        <span class="hint">Percentual da atividade em jogos de cassino</span>
+      </div>
+      <div class="field">
+        <label>% Apostas Esportivas</label>
+        <input type="number" id="pct_esportivo" placeholder="Ex: 5" min="0" max="100">
+      </div>
     </div>
   </div>
 
@@ -685,7 +689,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
   <div class="card">
     <div class="card-title">Tipo de Caso <span style="color:var(--or)">*</span></div>
     <div class="field">
-      <select id="tipo_caso" onchange="onTipoCasoChange()" required
+      <select id="tipo_caso" onchange="onTipoCasoChange()" required>
         <option value="">Selecionar tipo de fundamento...</option>
         <option value="ros_dep_ret">ROS — Inconsistência Econômica em Depósitos e Retiradas com sinais de comportamento suspeito</option>
         <option value="ros_ap_prem">ROS — Inconsistência Econômica entre Apostas e Prêmios com sinais de comportamento suspeito</option>
@@ -708,7 +712,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     </div>
     <div class="field">
       <label>Texto narrativo (editável) <span class="req">*</span></label>
-      <textarea id="texto_narrativo" rows="14"</textarea>
+      <textarea id="texto_narrativo" rows="14"></textarea>
       <span class="err-msg">Campo obrigatório</span>
     </div>
     <div class="field" style="margin-top:12px">
@@ -2065,6 +2069,7 @@ function resetForm() {
 // INIT
 // ══════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
+  window.monthTableData = {};
   buildAlertasList();
   buildMonthTable();
   const today = new Date().toISOString().split('T')[0];
