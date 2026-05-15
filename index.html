@@ -6,7 +6,7 @@
 <title>BetWarrior — AML Brasil · Armado de Legajos</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -816,8 +816,8 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <div class="file-upload-area">
           <label class="file-upload-label">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="8" r="3" stroke="#FF4500" stroke-width="1.5"/><path d="M3 16c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <div><span>Foto / Selfie</span><small>JPG, PNG</small></div>
-            <input type="file" accept=".jpg,.jpeg,.png" onchange="addFiles(this,'list-foto')">
+            <div><span>Foto / Selfie</span><small>JPG, PNG, PDF</small></div>
+            <input type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="addFiles(this,'list-foto')">
           </label>
           <div class="file-list" id="list-foto"></div>
         </div>
@@ -1211,23 +1211,56 @@ async function parseDetalle(input) {
   addFileItem('list-detalle', file.name); input.value='';
   try {
     const wb = await readWorkbook(file);
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:null, raw:false});
+    // Use raw:true to get raw values, then handle dates manually
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:null, raw:true});
+
     const monthly = {};
+    let parsed = 0;
+
     rows.forEach(r => {
-      const dateVal = r['Date']; if (!dateVal) return;
-      let d = (dateVal instanceof Date) ? dateVal : new Date(dateVal);
-      if (isNaN(d.getTime())) return;
-      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const dateVal = r['Date'];
+      if (!dateVal) return;
+
+      let d = null;
+
+      if (typeof dateVal === 'number') {
+        // Excel serial date number → JS Date
+        d = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
+      } else if (dateVal instanceof Date) {
+        d = dateVal;
+      } else if (typeof dateVal === 'string' && dateVal.trim()) {
+        // Try ISO string yyyy-MM-dd or dd/MM/yyyy
+        const s = dateVal.trim();
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+          d = new Date(s.substring(0, 10));
+        } else if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+          const [dd, mm, yyyy] = s.split('/');
+          d = new Date(`${yyyy}-${mm}-${dd}`);
+        } else {
+          d = new Date(s);
+        }
+      }
+
+      if (!d || isNaN(d.getTime())) return;
+
+      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`;
       if (!monthly[key]) monthly[key]={dep:0,ret:0};
       monthly[key].dep += parseFloat(r['Deposit Local Curr']||0)||0;
       monthly[key].ret += parseFloat(r['Withdrawal Local Curr']||0)||0;
+      parsed++;
     });
+
     window.monthTableData = monthly;
     buildMonthTableFromData(monthly);
     document.getElementById('detalle-table-wrap').style.display='block';
+
+    const months = Object.keys(monthly).sort();
     showParseOk('detalle-parsed-ok','detalle-parsed-msg',
-      `✓  ${rows.length} transações lidas — tabela mensal gerada (${Object.keys(monthly).length} meses com movimentação)`);
-  } catch(e) { showParseWarn('detalle-parsed-ok','detalle-parsed-msg','Erro: '+e.message); }
+      `✓  ${parsed} transações lidas — ${Object.keys(monthly).length} meses com movimentação (${months[0]} → ${months[months.length-1]})`);
+  } catch(e) {
+    showParseWarn('detalle-parsed-ok','detalle-parsed-msg','Erro: '+e.message);
+    console.error(e);
+  }
 }
 
 // ── Build month table from parsed data ──
@@ -1729,8 +1762,9 @@ async function generatePDF() {
 // WORD GENERATION
 // ══════════════════════════════════════════
 async function generateWord() {
+  const docxLib = window.docx || window.DOCX || docx;
   const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-          WidthType, ShadingType, BorderStyle, AlignmentType, VerticalAlign } = docx;
+          WidthType, ShadingType, BorderStyle, AlignmentType, VerticalAlign } = docxLib;
 
   const v = id => { const el=document.getElementById(id); return el ? (el.value||'') : ''; };
   const fmtDate = (id) => {
