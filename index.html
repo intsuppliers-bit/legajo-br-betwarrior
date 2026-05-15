@@ -1667,7 +1667,7 @@ async function generatePDF() {
 
   // ── 2-col client row (each half has label+value) ──
   function row2(l1,v1,l2,v2) {
-    const H=6.5, hw=cw/2, lw=32;
+    const H=6.5, hw=cw/2, lw=38;
     check(H);
     doc.setFillColor(255,255,255); doc.rect(ML,y,cw,H,'F');
     doc.setDrawColor(220,220,220); doc.rect(ML,y,cw,H,'S');
@@ -1909,12 +1909,16 @@ async function generatePDF() {
   row2('Ocupação',v('atividade')||'–','Fonte de Fundos',v('fonte_fundos')||'–');
   y+=4;
 
-  const monthly=(window.monthTableData&&Object.keys(window.monthTableData).length>0)
-    ?window.monthTableData
-    :(()=>{const m={};[2025,2026].forEach(yr=>{for(let mo=1;mo<=12;mo++){
-      const dep=parseFloat(document.getElementById(`dep_${yr}_${mo}`)?.value||0)||0;
-      const ret=parseFloat(document.getElementById(`ret_${yr}_${mo}`)?.value||0)||0;
-      if(dep>0||ret>0){const k=`${yr}-${String(mo).padStart(2,'0')}`;m[k]={dep,ret};}}});return m;})();
+  // Siempre leer los inputs actuales (reflejan ediciones manuales del usuario)
+  const monthly=(()=>{const m={};
+    document.querySelectorAll('[id^="dep_"],[id^="ret_"]').forEach(el=>{
+      const parts=el.id.split('_'); const type=parts[0]; const yr=parts[1]; const mo=parts[2];
+      const val=parseFloat(el.value||0)||0;
+      if(val>0){const k=`${yr}-${String(mo).padStart(2,'0')}`;
+        if(!m[k])m[k]={dep:0,ret:0}; m[k][type]+=val;}
+    });
+    return m;
+  })();
   monthlyTable(monthly);
 
   // — Buscas —
