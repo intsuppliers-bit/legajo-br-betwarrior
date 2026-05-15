@@ -1744,29 +1744,23 @@ async function generatePDF() {
     y+=H;
   }
 
-  // ── Search row (3-col grid) ──
+  // ── Search rows — vertical list ──
   function buscaRow(items) {
-    // items = [[label, result], ...]  — render in groups of 3
-    for(let i=0;i<items.length;i+=3){
+    items.forEach((item,i) => {
       const H=6.5;
       check(H);
-      const colw=cw/3;
-      for(let j=0;j<3;j++){
-        const item=items[i+j]; if(!item) continue;
-        const x=ML+colw*j;
-        doc.setFillColor(j%2===0?255:252,252,252);
-        doc.rect(x,y,colw,H,'F');
-        doc.setDrawColor(220,220,220); doc.rect(x,y,colw,H,'S');
-        sf(7,true,68,68,68); doc.text(item[0].toUpperCase(),x+3,y+H-2);
-        const isPos=item[1]==='Positivo';
-        if(isPos){doc.setFillColor(252,232,232);doc.setDrawColor(198,40,40);}
-        else{doc.setFillColor(230,244,236);doc.setDrawColor(46,125,50);}
-        doc.roundedRect(x+colw-27,y+1.5,25,3.8,1.5,1.5,'FD');
-        if(isPos) sf(6,true,198,40,40); else sf(6,true,27,94,32);
-        doc.text(item[1].toUpperCase(),x+colw-14.5,y+H-2,{align:'center'});
-      }
+      doc.setFillColor(i%2===0?255:250,250,250);
+      doc.rect(ML,y,cw,H,'F');
+      doc.setDrawColor(220,220,220); doc.rect(ML,y,cw,H,'S');
+      sf(7.5,true,68,68,68); doc.text(item[0].toUpperCase(),ML+3,y+H-2);
+      const isPos=item[1]==='Positivo';
+      if(isPos){doc.setFillColor(252,232,232);doc.setDrawColor(198,40,40);}
+      else{doc.setFillColor(230,244,236);doc.setDrawColor(46,125,50);}
+      doc.roundedRect(ML+cw-32,y+1.5,30,4,1.5,1.5,'FD');
+      if(isPos) sf(7,true,198,40,40); else sf(7,true,27,94,32);
+      doc.text(item[1].toUpperCase(),ML+cw-17,y+H-2,{align:'center'});
       y+=H;
-    }
+    });
   }
 
   // ── Gray separator ──
@@ -1828,22 +1822,23 @@ async function generatePDF() {
   y=22;
 
   // — Análise —
-  doc.setFillColor(34,34,34); doc.rect(ML,y,cw,5.5,'F');
-  sf(6.5,true,160,160,160);
-  doc.text('Informações de Análise'.toUpperCase(),ML+3,y+3.8);
-  y+=5.5;
-  // 5-col values
+  // Analysis section with headers
   const rv=v('nivel_risco');
-  const a5vals=[v('situacao_conta'),(v('mes_ref')+' '+v('ano_ref')),'Brasil · Online',rv,v('id_grupo')];
+  const a5labels=['ESTADO','PERÍODO','NEGÓCIOS','RISCO','ID'];
+  const a5vals=[v('situacao_conta'),(v('mes_ref')+' '+v('ano_ref')).toUpperCase(),'BRASIL · ONLINE',rv.toUpperCase(),v('id_grupo')];
   const col5=cw/5;
-  doc.setFillColor(255,255,255); doc.rect(ML,y,cw,8,'F');
-  doc.setDrawColor(220,220,220); doc.rect(ML,y,cw,8,'S');
+  doc.setFillColor(34,34,34); doc.rect(ML,y,cw,6,'F');
+  sf(7,true,255,255,255);
+  a5labels.forEach((h,i)=>doc.text(h,ML+i*col5+col5/2,y+4.2,{align:'center'}));
+  y+=6;
+  doc.setFillColor(255,255,255); doc.rect(ML,y,cw,7.5,'F');
+  doc.setDrawColor(220,220,220); doc.rect(ML,y,cw,7.5,'S');
   a5vals.forEach((val,i)=>{
-    doc.setDrawColor(220,220,220); if(i<4) doc.line(ML+(i+1)*col5,y,ML+(i+1)*col5,y+8);
+    if(i<4) doc.line(ML+(i+1)*col5,y,ML+(i+1)*col5,y+7.5);
     const isR=i===3; const c=isR&&rv==='Alto'?[200,30,30]:isR&&rv==='Medio'?[180,90,0]:[20,20,20];
-    sf(8.5,isR,...c); doc.text(String(val||'–'),ML+i*col5+col5/2,y+5.5,{align:'center'});
+    sf(8.5,isR,...c); doc.text(String(val||'–'),ML+i*col5+col5/2,y+5,{align:'center'});
   });
-  y+=10;
+  y+=9;
 
   sep();
 
