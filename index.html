@@ -305,7 +305,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="grid-3">
       <div class="field">
         <label>Atividade / Ocupação <span class="req">*</span></label>
-        <select id="atividade" required>
+        <select id="atividade" required onchange="toggleOutro('atividade','atividade_outro_wrap')">
           <option value="">Selecionar</option>
           <option>Aposentado</option>
           <option>Autônomo</option>
@@ -322,9 +322,13 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         </select>
         <span class="err-msg">Campo obrigatório</span>
       </div>
+      <div class="field" id="atividade_outro_wrap" style="display:none">
+        <label>Especificar atividade <span class="req">*</span></label>
+        <input type="text" id="atividade_outro" placeholder="Descreva a atividade / ocupação">
+      </div>
       <div class="field">
         <label>Fonte de Fundos</label>
-        <select id="fonte_fundos">
+        <select id="fonte_fundos" onchange="toggleOutro('fonte_fundos','fonte_fundos_outro_wrap')">
           <option value="">Selecionar</option>
           <option>Poupança Laboral</option>
           <option>Poupança de Aposentadoria</option>
@@ -335,6 +339,10 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
           <option>Herança / Doação</option>
           <option>Outro</option>
         </select>
+      </div>
+      <div class="field" id="fonte_fundos_outro_wrap" style="display:none">
+        <label>Especificar fonte de fundos</label>
+        <input type="text" id="fonte_fundos_outro" placeholder="Descreva a origem dos recursos">
       </div>
 
       <div class="field">
@@ -714,6 +722,18 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <input type="checkbox" value="ros_no_resp" onchange="onTipoCasoChange()" style="margin-top:2px;accent-color:var(--or);flex-shrink:0">
         <span style="font-size:13px;color:var(--ink2)">ROS — Sem resposta à solicitação de ampliação de atividade (sem sinais evidentes)</span>
       </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--field-bdr);border-radius:6px;padding:10px 13px;cursor:pointer;transition:border-color .15s" id="lbl_ros_passthrough">
+        <input type="checkbox" value="ros_passthrough" onchange="onTipoCasoChange()" style="margin-top:2px;accent-color:var(--or);flex-shrink:0">
+        <span style="font-size:13px;color:var(--ink2)">ROS — Retirada imediata após depósito sem realização de aposta (passthrough)</span>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--field-bdr);border-radius:6px;padding:10px 13px;cursor:pointer;transition:border-color .15s" id="lbl_ros_terceiros">
+        <input type="checkbox" value="ros_terceiros" onchange="onTipoCasoChange()" style="margin-top:2px;accent-color:var(--or);flex-shrink:0">
+        <span style="font-size:13px;color:var(--ink2)">ROS — Utilização indevida de conta por terceiro ou indício de intermediação</span>
+      </label>
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--field-bdr);border-radius:6px;padding:10px 13px;cursor:pointer;transition:border-color .15s" id="lbl_ros_origem">
+        <input type="checkbox" value="ros_origem" onchange="onTipoCasoChange()" style="margin-top:2px;accent-color:var(--or);flex-shrink:0">
+        <span style="font-size:13px;color:var(--ink2)">ROS — Aporte de valores com suspeita sobre a origem dos recursos</span>
+      </label>
       <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--field-bdr);border-radius:6px;padding:10px 13px;cursor:pointer;transition:border-color .15s" id="lbl_no_ros">
         <input type="checkbox" value="no_ros" onchange="onTipoCasoChange()" style="margin-top:2px;accent-color:var(--or);flex-shrink:0">
         <span style="font-size:13px;color:var(--ink2)">NÃO ROS — O cliente não apresenta indícios para reporte ao SISCOAF</span>
@@ -985,6 +1005,9 @@ const ARTIGOS = {
     {cod:'1407',txt:'Art. 24-I — Apostas e operações a elas associadas que sinalizem: I - falta de fundamento econômico ou legal. Portaria SPA/MF 1.143/2024.'},
     {cod:'1418',txt:'Art. 25-IX — Apostas e operações a elas associadas que envolvam: IX - incompatibilidade entre as operações realizadas por apostador e seu padrão habitual de atividades, suas informações ocupacionais ou sua aparente situação financeira. Portaria SPA/MF 1.143/2024.'},
     {cod:'1420',txt:'Art. 25-XI — Apostas e operações a elas associadas que envolvam: XI - aporte ou retirada de valores, em um curto tempo, que possa sugerir fracionamento ou dissimulação de operação. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1415',txt:'Art. 25-VI — Apostas e operações a elas associadas que envolvam: VI - aporte de valores sobre os quais recaia suspeita quanto à sua origem. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1421',txt:'Art. 25-XII — Apostas e operações a elas associadas que envolvam: XII - retirada, ou tentativa de retirada, de recursos da conta transacional de apostador, logo após a realização de depósito, sem a efetivação de aposta. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1422',txt:'Art. 25-XIII — Apostas e operações a elas associadas que envolvam: XIII - utilização indevida de conta por outra pessoa que não seu titular. Portaria SPA/MF 1.143/2024.'},
     {cod:'1427',txt:'Art. 25-XVIII — Apostas e operações a elas associadas que envolvam: XVIII - dificuldade ou inviabilidade de coletar, verificar, validar ou atualizar informações cadastrais de apostadores ou usuários da plataforma. Portaria SPA/MF 1.143/2024.'},
   ],
   ros_ap_prem: [
@@ -994,11 +1017,33 @@ const ARTIGOS = {
     {cod:'1414',txt:'Art. 25-V — Apostas e operações a elas associadas que envolvam: V - prestação de informações falsas ou de difícil verificação. Portaria SPA/MF 1.143/2024.'},
     {cod:'1418',txt:'Art. 25-IX — Apostas e operações a elas associadas que envolvam: IX - incompatibilidade entre as operações realizadas por apostador e seu padrão habitual de atividades, suas informações ocupacionais ou sua aparente situação financeira. Portaria SPA/MF 1.143/2024.'},
     {cod:'1419',txt:'Art. 25-X — Apostas e operações a elas associadas que envolvam: X - movimentação atípica de valores de forma que possa sugerir o uso de ferramenta automatizada por parte do apostador. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1415',txt:'Art. 25-VI — Apostas e operações a elas associadas que envolvam: VI - aporte de valores sobre os quais recaia suspeita quanto à sua origem. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1423',txt:'Art. 25-XIV — Apostas e operações a elas associadas que envolvam: XIV - indício da utilização de conta por intermediador que realize apostas para outras pessoas. Portaria SPA/MF 1.143/2024.'},
   ],
   ros_no_resp: [
     {cod:'1413',txt:'Art. 25-IV — Apostas e operações a elas associadas que envolvam: IV - resistência do apostador ou usuário da plataforma em fornecer informações adicionais solicitadas pelo agente operador de apostas. Portaria SPA/MF 1.143/2024.'},
     {cod:'1414',txt:'Art. 25-V — Apostas e operações a elas associadas que envolvam: V - prestação de informações falsas ou de difícil verificação, notadamente para a formalização de cadastro, abertura de conta, registro de aposta ou outra operação na plataforma de apostas. Portaria SPA/MF 1.143/2024.'},
     {cod:'1427',txt:'Art. 25-XVIII — Apostas e operações a elas associadas que envolvam: XVIII - dificuldade ou inviabilidade de coletar, verificar, validar ou atualizar informações cadastrais de apostadores ou usuários da plataforma. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1422',txt:'Art. 25-XIII — Apostas e operações a elas associadas que envolvam: XIII - utilização indevida de conta por outra pessoa que não seu titular. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1423',txt:'Art. 25-XIV — Apostas e operações a elas associadas que envolvam: XIV - indício da utilização de conta por intermediador que realize apostas para outras pessoas. Portaria SPA/MF 1.143/2024.'},
+  ],
+  ros_passthrough: [
+    {cod:'1421',txt:'Art. 25-XII — Apostas e operações a elas associadas que envolvam: XII - retirada, ou tentativa de retirada, de recursos da conta transacional de apostador, logo após a realização de depósito, sem a efetivação de aposta. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1415',txt:'Art. 25-VI — Apostas e operações a elas associadas que envolvam: VI - aporte de valores sobre os quais recaia suspeita quanto à sua origem. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1407',txt:'Art. 24-I — Apostas e operações a elas associadas que sinalizem: I - falta de fundamento econômico ou legal. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1420',txt:'Art. 25-XI — Apostas e operações a elas associadas que envolvam: XI - aporte ou retirada de valores, em um curto tempo, que possa sugerir fracionamento ou dissimulação de operação. Portaria SPA/MF 1.143/2024.'},
+  ],
+  ros_terceiros: [
+    {cod:'1422',txt:'Art. 25-XIII — Apostas e operações a elas associadas que envolvam: XIII - utilização indevida de conta por outra pessoa que não seu titular. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1423',txt:'Art. 25-XIV — Apostas e operações a elas associadas que envolvam: XIV - indício da utilização de conta por intermediador que realize apostas para outras pessoas. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1407',txt:'Art. 24-I — Apostas e operações a elas associadas que sinalizem: I - falta de fundamento econômico ou legal. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1427',txt:'Art. 25-XVIII — Apostas e operações a elas associadas que envolvam: XVIII - dificuldade ou inviabilidade de coletar, verificar, validar ou atualizar informações cadastrais de apostadores ou usuários da plataforma. Portaria SPA/MF 1.143/2024.'},
+  ],
+  ros_origem: [
+    {cod:'1415',txt:'Art. 25-VI — Apostas e operações a elas associadas que envolvam: VI - aporte de valores sobre os quais recaia suspeita quanto à sua origem. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1407',txt:'Art. 24-I — Apostas e operações a elas associadas que sinalizem: I - falta de fundamento econômico ou legal. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1418',txt:'Art. 25-IX — Apostas e operações a elas associadas que envolvam: IX - incompatibilidade entre as operações realizadas por apostador e seu padrão habitual de atividades, suas informações ocupacionais ou sua aparente situação financeira. Portaria SPA/MF 1.143/2024.'},
+    {cod:'1413',txt:'Art. 25-IV — Apostas e operações a elas associadas que envolvam: IV - resistência do apostador ou usuário da plataforma em fornecer informações adicionais solicitadas pelo agente operador de apostas. Portaria SPA/MF 1.143/2024.'},
   ],
   no_ros: []
 };
@@ -1049,6 +1094,30 @@ Adicionalmente, cabe destacar que, em [DATA_INICIO], o cliente superou o limiar 
 Dessa forma, ainda que a movimentação não apresente indícios concretos de lavagem de dinheiro ou financiamento do terrorismo sob o ponto de vista exclusivamente transacional, o caso será reportado conforme os critérios previstos na Portaria SPA/MF nº 1.143/2024, em cumprimento às obrigações do operador, em razão da ausência de resposta e da impossibilidade de validação das informações essenciais do cliente.
 
 A informação apresentada neste informe foi inicialmente revisada pelo analista responsável, que conduziu o processo conforme descrito nas seções precedentes. Posteriormente, o material foi avaliado pelo responsável de AML. Por fim, em [DATA_RELATORIO], o Supervisor realizou a revisão integral do expediente e aprovou a continuidade do procedimento correspondente.`,
+
+  ros_passthrough: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente.
+
+Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Observou-se um padrão consistente de retirada de recursos logo após a realização de depósitos, sem a efetivação de apostas, o que caracteriza comportamento compatível com uso da plataforma como canal de movimentação financeira (passthrough), sem finalidade lúdica aparente.
+
+Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, não tendo sido identificadas correspondências positivas. As pesquisas de mídia adversa tampouco retornaram informações negativas.
+
+Diante do padrão transacional identificado, que sugere possível utilização da plataforma para dissimulação ou fracionamento de operações financeiras, recomenda-se o reporte das operações como suspeitas (ROS), em conformidade com a Portaria SPA/MF nº 1.143/2024 e demais normativos aplicáveis.`,
+
+  ros_terceiros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro.
+
+Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Foram identificados indícios de utilização indevida da conta por pessoa distinta do titular, ou evidências de que a conta está sendo utilizada por um intermediador que realiza apostas em nome de terceiros, configurando situação de risco elevado de acordo com os normativos aplicáveis.
+
+Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, não tendo sido identificadas correspondências positivas. As pesquisas de mídia adversa tampouco retornaram informações negativas.
+
+Diante dos indícios identificados de uso de conta por terceiro ou intermediador, recomenda-se o reporte das operações como suspeitas (ROS), em conformidade com a Portaria SPA/MF nº 1.143/2024 e demais normativos aplicáveis.`,
+
+  ros_origem: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente.
+
+Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. No que se refere ao perfil econômico declarado, o cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos utilizados na plataforma seriam provenientes de [FONTE_FUNDOS]. Contudo, os valores aportados apresentam incompatibilidade com a capacidade econômico-financeira declarada, e não foi possível verificar de forma independente a origem dos recursos movimentados na plataforma.
+
+Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, não tendo sido identificadas correspondências positivas. As pesquisas de mídia adversa tampouco retornaram informações negativas.
+
+Diante da impossibilidade de verificação da origem dos recursos e da incompatibilidade com o perfil declarado, recomenda-se o reporte das operações como suspeitas (ROS), em conformidade com a Portaria SPA/MF nº 1.143/2024 e demais normativos aplicáveis.`,
 
   no_ros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente.
 
@@ -1236,61 +1305,43 @@ async function parseDetalle(input) {
     const wb = await readWorkbook(file);
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws, {defval:null, raw:true});
-
     const monthly = {};
     let parsed = 0;
-
-    // ── Detectar formato del archivo ──
-    const firstDataRow = rows.find(r => r['MonthYearName'] || r['Date'] || r['PARTYID']);
-    const isMonthlyFormat = firstDataRow && ('MonthYearName' in firstDataRow || 'Depositos' in firstDataRow);
-
-    if (isMonthlyFormat) {
-      // FORMATO B: MonthYearName, Depositos, Retiros (ya agrupado por mes)
-      const MONTH_MAP = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+    const isMonthlyFmt = rows.length > 0 && ('MonthYearName' in rows[0] || 'Depositos' in rows[0]);
+    if (isMonthlyFmt) {
+      const MM = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
       rows.forEach(r => {
         const myn = String(r['MonthYearName']||'').trim();
-        if (!myn || myn === 'Total' || myn.toLowerCase().startsWith('filtro')) return;
-        // Parse "Apr-2026" or "Apr 2026"
-        const parts = myn.split(/[-\s]/);
-        if (parts.length < 2) return;
-        const mo = MONTH_MAP[parts[0]];
-        const yr = parseInt(parts[1]);
-        if (!mo || !yr || yr < 2020 || yr > 2035) return;
-        const key = `${yr}-${String(mo).padStart(2,'0')}`;
-        if (!monthly[key]) monthly[key] = {dep:0, ret:0};
-        monthly[key].dep += (typeof r['Depositos']==='number' ? r['Depositos'] : 0);
-        monthly[key].ret += (typeof r['Retiros']==='number' ? r['Retiros'] : 0);
+        if (!myn || myn==='Total' || myn.toLowerCase().startsWith('filtro')) return;
+        const p = myn.split(/[-\s]/); const mo=MM[p[0]]; const yr=parseInt(p[1]);
+        if (!mo||!yr||yr<2020||yr>2035) return;
+        const key=`${yr}-${String(mo).padStart(2,'0')}`;
+        if (!monthly[key]) monthly[key]={dep:0,ret:0};
+        monthly[key].dep+=(typeof r['Depositos']==='number'?r['Depositos']:0);
+        monthly[key].ret+=(typeof r['Retiros']==='number'?r['Retiros']:0);
         parsed++;
       });
     } else {
-      // FORMATO A: PARTYID, Date, Deposit Local Curr, Withdrawal Local Curr (diário)
       rows.forEach(r => {
-        const pid = r['PARTYID'];
-        if (pid === null || pid === undefined) return;
-        if (typeof pid !== 'number' && isNaN(Number(String(pid).trim()))) return;
-        const dateVal = r['Date'];
-        if (!dateVal) return;
-        let d = null;
-        if (dateVal instanceof Date) {
-          d = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate(), 12);
-        } else if (typeof dateVal === 'number' && dateVal > 40000) {
-          const tmp = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
-          d = new Date(tmp.getUTCFullYear(), tmp.getUTCMonth(), tmp.getUTCDate(), 12);
-        } else {
-          const s = String(dateVal).trim();
-          if (/^\d{4}-\d{2}-\d{2}/.test(s)) d = new Date(s.substring(0,10)+'T12:00:00');
-          else if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) { const [dd,mm,yyyy]=s.split('/'); d=new Date(`${yyyy}-${mm}-${dd}T12:00:00`); }
-        }
-        if (!d || isNaN(d.getTime())) return;
-        const yr = d.getFullYear(); const mo = d.getMonth()+1;
-        if (yr < 2020 || yr > 2035) return;
-        const key = `${yr}-${String(mo).padStart(2,'0')}`;
-        if (!monthly[key]) monthly[key] = {dep:0, ret:0};
-        monthly[key].dep += (typeof r['Deposit Local Curr']==='number' ? r['Deposit Local Curr'] : 0);
-        monthly[key].ret += (typeof r['Withdrawal Local Curr']==='number' ? r['Withdrawal Local Curr'] : 0);
+        const pid=r['PARTYID'];
+        if (pid===null||pid===undefined) return;
+        if (typeof pid!=='number'&&isNaN(Number(String(pid).trim()))) return;
+        const dateVal=r['Date']; if (!dateVal) return;
+        let d=null;
+        if (dateVal instanceof Date) { d=new Date(dateVal.getFullYear(),dateVal.getMonth(),dateVal.getDate(),12); }
+        else if (typeof dateVal==='number'&&dateVal>40000) { const tmp=new Date(Math.round((dateVal-25569)*86400*1000)); d=new Date(tmp.getUTCFullYear(),tmp.getUTCMonth(),tmp.getUTCDate(),12); }
+        else { const s=String(dateVal).trim(); if(/^\d{4}-\d{2}-\d{2}/.test(s)) d=new Date(s.substring(0,10)+'T12:00:00'); else if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){const[dd,mm,yyyy]=s.split('/');d=new Date(`${yyyy}-${mm}-${dd}T12:00:00`);} }
+        if (!d||isNaN(d.getTime())) return;
+        const yr=d.getFullYear(); const mo=d.getMonth()+1;
+        if (yr<2020||yr>2035) return;
+        const key=`${yr}-${String(mo).padStart(2,'0')}`;
+        if (!monthly[key]) monthly[key]={dep:0,ret:0};
+        monthly[key].dep+=(typeof r['Deposit Local Curr']==='number'?r['Deposit Local Curr']:0);
+        monthly[key].ret+=(typeof r['Withdrawal Local Curr']==='number'?r['Withdrawal Local Curr']:0);
         parsed++;
       });
     }
+    let skipped = 0;
 
     if (parsed === 0) {
       showParseWarn('detalle-parsed-ok','detalle-parsed-msg',
@@ -1464,8 +1515,8 @@ function substituteFields(texto) {
     .replace(/\[PREMIOS_TOTAL\]/g, fmtNum('premios_total'))
     .replace(/\[PCT_CASINO\]/g, v('pct_casino') || '[%]')
     .replace(/\[PCT_ESPORTIVO\]/g, v('pct_esportivo') || '[%]')
-    .replace(/\[ATIVIDADE\]/g, v('atividade') || '[ATIVIDADE]')
-    .replace(/\[FONTE_FUNDOS\]/g, v('fonte_fundos') || '[FONTE_FUNDOS]')
+    .replace(/\[ATIVIDADE\]/g, vOcup() || '[ATIVIDADE]')
+    .replace(/\[FONTE_FUNDOS\]/g, vFonte() || '[FONTE_FUNDOS]')
     .replace(/\[NIVEL_RISCO\]/g, (v('nivel_risco')||'[RISCO]').toLowerCase())
     .replace(/\[DATA_PRIMEIRO_DEP\]/g, fmt('data_primeiro_dep') || '[DATA_PRIMEIRO_DEP]')
     .replace(/\[DATA_RELATORIO\]/g, fmt('data_relatorio') || '[DATA_RELATORIO]')
@@ -1862,7 +1913,7 @@ async function generatePDF() {
   row2('Estado Civil',v('estado_civil')||'–','Estado (UF)',v('estado_uf'));
   const endParts=[v('endereco'),v('localidade'),v('estado_uf')?v('estado_uf'):null,v('cep')?'CEP '+v('cep'):null].filter(Boolean);
   rowFull('Endereço', endParts.join(', ')||'–');
-  row2('Atividade',v('atividade')||'–','Fonte de Fundos',v('fonte_fundos')||'–');
+  row2('Atividade',vOcup()||'–','Fonte de Fundos',vFonte()||'–');
   row2('Data Cadastro',fmtDate('data_cadastro'),'Situação Conta',v('situacao_conta')||'–');
   y+=1;
   flagRow('Condição — Pessoa Politicamente Exposta', 'PEP Não', false);
@@ -1913,15 +1964,14 @@ async function generatePDF() {
   secBar('Visão Geral das Transações');
   row2('País','Brasil','ID do Grupo',v('id_grupo'));
   row2('Nome',v('nome'),'Sobrenome',v('sobrenome'));
-  row2('Ocupação',v('atividade')||'–','Fonte de Fundos',v('fonte_fundos')||'–');
+  row2('Ocupação',vOcup()||'–','Fonte de Fundos',vFonte()||'–');
   y+=4;
 
   const monthly=(()=>{const m={};
     document.querySelectorAll('[id^="dep_"],[id^="ret_"]').forEach(el=>{
       const parts=el.id.split('_');const type=parts[0];const yr=parts[1];const mo=parts[2];
       const val=parseFloat(el.value||0)||0;
-      if(val>0){const k=`${yr}-${String(mo).padStart(2,'0')}`;
-        if(!m[k])m[k]={dep:0,ret:0};m[k][type]+=val;}
+      if(val>0){const k=`${yr}-${String(mo).padStart(2,'0')}`;if(!m[k])m[k]={dep:0,ret:0};m[k][type]+=val;}
     });return m;
   })();
   monthlyTable(monthly);
@@ -2145,7 +2195,7 @@ async function generateWord() {
             row2('Outros valores (como recompensas e outros incentivos):', '-'),
             row2('Categoria ou modalidade de jogo ou aposta:', (v('pct_casino')||'–') + '% de sua atividade em jogos de cassino e ' + (v('pct_esportivo')||'–') + '% em apostas esportivas'),
             row2('Forma de pagamento:', v('forma_pagamento') || 'XP_W_BankTransfer'),
-            row2('Origem dos recursos:', v('atividade')),
+            row2('Origem dos recursos:', vOcup()),
             row2('Destino dos recursos:', v('fonte_fundos')),
             rowFull('', false),
             rowFull('4. Existência de intermediário:', true),
@@ -2230,6 +2280,25 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('data_relatorio').value = today;
   document.getElementById('data_busca').value = today;
 });
+
+function toggleOutro(selectId, wrapId) {
+  const sel = document.getElementById(selectId);
+  const wrap = document.getElementById(wrapId);
+  if (!sel || !wrap) return;
+  wrap.style.display = sel.value === 'Outro' ? 'block' : 'none';
+  const input = wrap.querySelector('input');
+  if (input && sel.value !== 'Outro') input.value = '';
+}
+function vOcup() {
+  const sel = document.getElementById('atividade');
+  if (sel && sel.value === 'Outro') return document.getElementById('atividade_outro')?.value || 'Outro';
+  return sel ? sel.value : '';
+}
+function vFonte() {
+  const sel = document.getElementById('fonte_fundos');
+  if (sel && sel.value === 'Outro') return document.getElementById('fonte_fundos_outro')?.value || 'Outro';
+  return sel ? sel.value : '';
+}
 </script>
 </body>
 </html>
