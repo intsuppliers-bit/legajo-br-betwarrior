@@ -547,6 +547,14 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <label>Prêmios Totais (R$)</label>
         <input type="number" id="premios_total" placeholder="0.00" min="0" step="0.01">
       </div>
+      <div class="field">
+        <label>Apostas no Mês Analisado (R$)</label>
+        <input type="number" id="apostas_mes" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="field">
+        <label>Prêmios no Mês Analisado (R$)</label>
+        <input type="number" id="premios_mes" placeholder="0.00" min="0" step="0.01">
+      </div>
     </div>
     <div id="historico-parsed-ok" style="display:none;margin-top:10px" class="inline-alert" style="background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -1041,9 +1049,9 @@ Em [DATA_ALERTA_INTERNO], o cliente ultrapassou os limites internos estabelecido
 
 No que se refere ao perfil econômico declarado, o cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos utilizados na plataforma seriam provenientes de [FONTE_FUNDOS]. Em resposta à solicitação de ampliação de atividade e origem de fundos, o cliente apresentou declaração, porém não foi possível corroborar de maneira independente que a atividade declarada corresponda efetivamente à sua atividade econômica real, tampouco foram identificadas informações adicionais em fontes públicas ou bases externas que permitissem validar a atividade profissional informada ou a capacidade econômico-financeira correspondente.
 
-Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET], registrando elevado nível de transacionalidade dentro da plataforma.
+Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET], registrando elevado nível de transacionalidade dentro da plataforma. No mesmo período, o cliente registrou apostas no valor de R$ [APOSTAS_MES] e prêmios no valor de R$ [PREMIOS_MES].
 
-De acordo com o relatório transacional consolidado, o cliente concentra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas, alcançando volume total de apostas de R$ [APOSTAS_TOTAL] e prêmios no valor de R$ [PREMIOS_TOTAL], evidenciando dinâmica operacional relevante dentro da plataforma. A data confirmada do primeiro depósito é [DATA_PRIMEIRO_DEP].
+De acordo com o relatório transacional consolidado, o cliente concentra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas, alcançando volume total de apostas de R$ [APOSTAS_TOTAL] e prêmios no valor de R$ [PREMIOS_TOTAL], evidenciando dinâmica operacional relevante dentro da plataforma. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL] e saques totais de R$ [RET_TOTAL]. A data confirmada do primeiro depósito é [DATA_PRIMEIRO_DEP].
 
 Embora não tenham sido identificados padrões transacionais que indiquem de forma direta práticas relacionadas à lavagem de dinheiro ou financiamento do terrorismo, observa-se volume elevado de transações em apostas e prêmios. Referido volume não se mostra compatível com o perfil econômico declarado pelo cliente, evidenciando inconsistência entre a atividade informada e a movimentação financeira observada na plataforma.
 
@@ -1470,6 +1478,8 @@ function substituteFields(texto) {
     .replace(/\[VAL_RET\]/g, fmtNum('val_ret'))
     .replace(/\[DEP_TOTAL\]/g, fmtNum('dep_total'))
     .replace(/\[RET_TOTAL\]/g, fmtNum('ret_total'))
+    .replace(/\[APOSTAS_MES\]/g, fmtNum('apostas_mes'))
+    .replace(/\[PREMIOS_MES\]/g, fmtNum('premios_mes'))
     .replace(/\[APOSTAS_TOTAL\]/g, fmtNum('apostas_total'))
     .replace(/\[PREMIOS_TOTAL\]/g, fmtNum('premios_total'))
     .replace(/\[PCT_CASINO\]/g, v('pct_casino') || '[%]')
@@ -1498,6 +1508,8 @@ function resubstituteNarrative() {
   const esport = vv('pct_esportivo'); if (esport) ta.value = ta.value.replace(/\[PCT_ESPORTIVO\]/g, esport);
   const depTot = vv('dep_total'); if (depTot) { const n=parseFloat(depTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[DEP_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const retTot = vv('ret_total'); if (retTot) { const n=parseFloat(retTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[RET_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
+  const apMes = vv('apostas_mes'); if (apMes) { const n=parseFloat(apMes); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[APOSTAS_MES\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
+  const prMes = vv('premios_mes'); if (prMes) { const n=parseFloat(prMes); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[PREMIOS_MES\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const apTot = vv('apostas_total'); if (apTot) { const n=parseFloat(apTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[APOSTAS_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const prTot = vv('premios_total'); if (prTot) { const n=parseFloat(prTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[PREMIOS_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const relatorio = fmt('data_relatorio'); if (relatorio) ta.value = ta.value.replace(/\[DATA_RELATORIO\]/g, relatorio);
