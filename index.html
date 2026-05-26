@@ -322,10 +322,6 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         </select>
         <span class="err-msg">Campo obrigatório</span>
       </div>
-      <div class="field" id="atividade_outro_wrap" style="display:none">
-        <label>Especificar atividade <span class="req">*</span></label>
-        <input type="text" id="atividade_outro" placeholder="Descreva a atividade / ocupação">
-      </div>
       <div class="field">
         <label>Fonte de Fundos</label>
         <select id="fonte_fundos" onchange="toggleOutro('fonte_fundos','fonte_fundos_outro_wrap')">
@@ -367,6 +363,18 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
           <option value="Bajo">Baixo</option>
         </select>
         <span class="err-msg">Campo obrigatório</span>
+      </div>
+    </div>
+    <div id="atividade_outro_wrap" style="display:none;margin-top:10px">
+      <div class="field">
+        <label>Especificar Atividade / Ocupação <span class="req">*</span></label>
+        <input type="text" id="atividade_outro" placeholder="Descreva a atividade / ocupação">
+      </div>
+    </div>
+    <div id="fonte_fundos_outro_wrap" style="display:none;margin-top:10px">
+      <div class="field">
+        <label>Especificar Fonte de Fundos</label>
+        <input type="text" id="fonte_fundos_outro" placeholder="Descreva a origem dos recursos">
       </div>
     </div>
   </div>
@@ -547,14 +555,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <label>Prêmios Totais (R$)</label>
         <input type="number" id="premios_total" placeholder="0.00" min="0" step="0.01">
       </div>
-      <div class="field">
-        <label>Apostas no Mês Analisado (R$)</label>
-        <input type="number" id="apostas_mes" placeholder="0.00" min="0" step="0.01">
-      </div>
-      <div class="field">
-        <label>Prêmios no Mês Analisado (R$)</label>
-        <input type="number" id="premios_mes" placeholder="0.00" min="0" step="0.01">
-      </div>
+
     </div>
     <div id="historico-parsed-ok" style="display:none;margin-top:10px" class="inline-alert" style="background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -1478,8 +1479,8 @@ function substituteFields(texto) {
     .replace(/\[VAL_RET\]/g, fmtNum('val_ret'))
     .replace(/\[DEP_TOTAL\]/g, fmtNum('dep_total'))
     .replace(/\[RET_TOTAL\]/g, fmtNum('ret_total'))
-    .replace(/\[APOSTAS_MES\]/g, fmtNum('apostas_mes'))
-    .replace(/\[PREMIOS_MES\]/g, fmtNum('premios_mes'))
+    .replace(/\[APOSTAS_MES\]/g, fmtNum('apostas_periodo'))
+    .replace(/\[PREMIOS_MES\]/g, fmtNum('premios_periodo'))
     .replace(/\[APOSTAS_TOTAL\]/g, fmtNum('apostas_total'))
     .replace(/\[PREMIOS_TOTAL\]/g, fmtNum('premios_total'))
     .replace(/\[PCT_CASINO\]/g, v('pct_casino') || '[%]')
@@ -1508,8 +1509,8 @@ function resubstituteNarrative() {
   const esport = vv('pct_esportivo'); if (esport) ta.value = ta.value.replace(/\[PCT_ESPORTIVO\]/g, esport);
   const depTot = vv('dep_total'); if (depTot) { const n=parseFloat(depTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[DEP_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const retTot = vv('ret_total'); if (retTot) { const n=parseFloat(retTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[RET_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
-  const apMes = vv('apostas_mes'); if (apMes) { const n=parseFloat(apMes); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[APOSTAS_MES\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
-  const prMes = vv('premios_mes'); if (prMes) { const n=parseFloat(prMes); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[PREMIOS_MES\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
+  const apMes = vv('apostas_periodo'); if (apMes) { const n=parseFloat(apMes); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[APOSTAS_MES\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
+  const prMes = vv('premios_periodo'); if (prMes) { const n=parseFloat(prMes); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[PREMIOS_MES\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const apTot = vv('apostas_total'); if (apTot) { const n=parseFloat(apTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[APOSTAS_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const prTot = vv('premios_total'); if (prTot) { const n=parseFloat(prTot); const dec=n%1===0?0:2; ta.value = ta.value.replace(/\[PREMIOS_TOTAL\]/g, 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:2})); }
   const relatorio = fmt('data_relatorio'); if (relatorio) ta.value = ta.value.replace(/\[DATA_RELATORIO\]/g, relatorio);
@@ -2252,14 +2253,25 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('data_busca').value = today;
 });
 
+
 function toggleOutro(selectId, wrapId) {
-  const sel=document.getElementById(selectId); const wrap=document.getElementById(wrapId);
-  if(!sel||!wrap) return;
-  wrap.style.display=sel.value==='Outro'?'block':'none';
-  const input=wrap.querySelector('input'); if(input&&sel.value!=='Outro') input.value='';
+  const sel = document.getElementById(selectId);
+  const wrap = document.getElementById(wrapId);
+  if (!sel || !wrap) return;
+  wrap.style.display = sel.value === 'Outro' ? 'block' : 'none';
+  const input = wrap.querySelector('input');
+  if (input && sel.value !== 'Outro') input.value = '';
 }
-function vOcup(){const sel=document.getElementById('atividade');if(sel&&sel.value==='Outro')return document.getElementById('atividade_outro')?.value||'Outro';return sel?sel.value:'';}
-function vFonte(){const sel=document.getElementById('fonte_fundos');if(sel&&sel.value==='Outro')return document.getElementById('fonte_fundos_outro')?.value||'Outro';return sel?sel.value:'';}
+function vOcup() {
+  const sel = document.getElementById('atividade');
+  if (sel && sel.value === 'Outro') return document.getElementById('atividade_outro')?.value || 'Outro';
+  return sel ? sel.value : '';
+}
+function vFonte() {
+  const sel = document.getElementById('fonte_fundos');
+  if (sel && sel.value === 'Outro') return document.getElementById('fonte_fundos_outro')?.value || 'Outro';
+  return sel ? sel.value : '';
+}
 </script>
 </body>
 </html>
