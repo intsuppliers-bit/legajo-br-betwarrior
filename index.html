@@ -162,6 +162,30 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
 .risk-badge.alto{background:#FDECEC;color:#E53935;border:1px solid #F5C6C6}
 .risk-badge.medio{background:#FFF3E0;color:#F57C00;border:1px solid #FFD180}
 .risk-badge.bajo{background:#F1F8E9;color:#558B2F;border:1px solid #AED581}
+/* ── DB STATUS BAR ── */
+.db-status-bar{background:#1A1A1A;border-bottom:1px solid #2A2A2A;padding:0 20px}
+.db-status-inner{max-width:900px;margin:0 auto;height:36px;display:flex;align-items:center;gap:12px;font-size:11px}
+.db-dot{width:8px;height:8px;border-radius:50%;background:#444;flex-shrink:0}
+.db-dot.loaded{background:var(--success)}
+.db-dot.loading{background:#F59E0B;animation:pulse .8s ease-in-out infinite}
+.db-text{color:#888;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.3px}
+.db-text.loaded{color:#aaa}
+.db-btn{margin-left:auto;background:none;border:1px solid #333;color:#666;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.8px;text-transform:uppercase;padding:4px 10px;border-radius:4px;cursor:pointer;transition:all .15s}
+.db-btn:hover{border-color:var(--or);color:var(--or)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* ── AUTOFILL BADGE ── */
+.autofill-badge{display:inline-flex;align-items:center;gap:5px;background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D;font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:2px 8px;border-radius:12px;margin-left:8px}
+.field-autofilled input,.field-autofilled select{background:#F0FFF4 !important;border-color:#22C55E !important}
+/* ── PDF SEARCH RESULTS ── */
+.pdf-extract-box{background:#F8F4FF;border:1.5px solid #C4B5FD;border-radius:var(--radius);padding:14px;margin-top:12px}
+.pdf-extract-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#5B21B6;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.pdf-field-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #EDE9FE;font-size:12px}
+.pdf-field-row:last-child{border-bottom:none}
+.pdf-field-label{color:#6B7280;font-weight:500}
+.pdf-field-value{color:var(--ink);font-weight:600;text-align:right;max-width:60%}
+.pdf-field-value.warn{color:#F59E0B}
+.pdf-field-value.ok{color:var(--success)}
+.pdf-field-value.alert{color:var(--error)}
 /* ── RESPONSIVE ── */
 @media(max-width:640px){
   .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
@@ -185,6 +209,17 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="header-sep"></div>
     <span class="header-title">AML Brasil · Armado de Legajos</span>
     <span class="header-badge">Confidencial · PLD</span>
+  </div>
+  <!-- DB STATUS BAR -->
+  <div class="db-status-bar" id="dbStatusBar">
+    <div class="db-status-inner">
+      <div class="db-dot" id="dbDot"></div>
+      <span class="db-text" id="dbText">Base de clientes não carregada</span>
+      <label class="db-btn" style="cursor:pointer">
+        Carregar / Atualizar DB
+        <input type="file" id="file_database" accept=".xlsx,.xls" style="display:none" onchange="loadDatabase(this)">
+      </label>
+    </div>
   </div>
   <div class="progress-bar-wrap">
     <div class="progress-track" id="progressTrack">
@@ -222,7 +257,10 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="grid-3">
       <div class="field">
         <label>ID do Grupo (Legajo) <span class="req">*</span></label>
-        <input type="text" id="id_grupo" required placeholder="Ex: 1015873">
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <input type="text" id="id_grupo" required placeholder="Ex: 1015873" style="flex:1" oninput="onIdChange()">
+          <button type="button" onclick="lookupClient()" style="background:var(--or);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.5px;text-transform:uppercase;padding:10px 14px;border-radius:var(--radius);cursor:pointer;white-space:nowrap;flex-shrink:0">Buscar</button>
+        </div>
         <span class="err-msg">Campo obrigatório</span>
       </div>
       <div class="field">
@@ -251,6 +289,10 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <span class="err-msg">Campo obrigatório</span>
       </div>
     </div>
+  </div>
+  <div id="autofill-banner" style="display:none;margin-bottom:14px" class="inline-alert info">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#3B82F6" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span id="autofill-msg"></span>
   </div>
 
   <div class="card">
@@ -469,22 +511,26 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     </div>
   </div>
 
-  <!-- BLOCO 1: MENSUAL -->
+  <!-- BLOCO ÚNICO: TRANSAÇÕES -->
   <div class="card">
-    <div class="card-title">1 — Transações do Mês Analisado (MENSUAL)</div>
-    <p class="hint" style="margin-bottom:12px">Relatório com depósitos, retiradas, apostas e prêmios do período analisado. Colunas esperadas: <em>Depositos, Cantidad Depositos, Retiros, Cantidad Retiros, Apuestas, Premios.</em></p>
+    <div class="card-title">Arquivo Transacional — Histórico do Cliente</div>
+    <p class="hint" style="margin-bottom:12px">Relatório exportado do BI com as movimentações do cliente. Colunas esperadas: <em>MonthYearName, Depositos, Cantidad Depositos, Retiros, Cantidad Retiros, Apuestas, Premios.</em> O sistema detecta o mês analisado e constrói a tabela histórica automaticamente.</p>
     <div class="file-upload-area" style="margin-bottom:14px">
       <label class="file-upload-label">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="14" rx="2" stroke="#FF4500" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <div><span>Transações do período (.xlsx)</span><small>Excel exportado do BI com movimentações do mês analisado</small></div>
-        <input type="file" id="file_mensual" accept=".xlsx,.xls,.csv" onchange="parseMensual(this)">
+        <div><span>Arquivo de transações (.xlsx)</span><small>Excel exportado do BI — inclui todo o histórico mensal</small></div>
+        <input type="file" id="file_transacoes" accept=".xlsx,.xls,.csv" onchange="parseTransacoes(this)">
       </label>
-      <div class="file-list" id="list-mensual"></div>
+      <div class="file-list" id="list-transacoes"></div>
     </div>
-    <!-- Fields auto-filled by parseMensual -->
-    <div class="grid-4" id="mensual-fields" style="display:none">
+    <div id="transacoes-parsed-ok" style="display:none;margin-top:10px" class="inline-alert">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span id="transacoes-parsed-msg"></span>
+    </div>
+    <!-- Fields auto-filled -->
+    <div class="grid-4" id="transacoes-fields" style="display:none;margin-top:14px">
       <div class="field">
-        <label>Qtd. Depósitos</label>
+        <label>Qtd. Depósitos (período)</label>
         <input type="number" id="qtd_dep" placeholder="0" min="0">
       </div>
       <div class="field">
@@ -492,7 +538,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <input type="number" id="val_dep" placeholder="0.00" min="0" step="0.01">
       </div>
       <div class="field">
-        <label>Qtd. Retiradas</label>
+        <label>Qtd. Retiradas (período)</label>
         <input type="number" id="qtd_ret" placeholder="0" min="0">
       </div>
       <div class="field">
@@ -500,45 +546,13 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <input type="number" id="val_ret" placeholder="0.00" min="0" step="0.01">
       </div>
       <div class="field">
-        <label>Apostas (R$)</label>
+        <label>Apostas período (R$)</label>
         <input type="number" id="apostas_periodo" placeholder="0.00" min="0" step="0.01">
       </div>
       <div class="field">
-        <label>Prêmios (R$)</label>
+        <label>Prêmios período (R$)</label>
         <input type="number" id="premios_periodo" placeholder="0.00" min="0" step="0.01">
       </div>
-    </div>
-    <div id="mensual-parsed-ok" style="display:none;margin-top:10px" class="inline-alert" style="background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span id="mensual-parsed-msg"></span>
-    </div>
-    <!-- % siempre visible -->
-    <div class="grid-2" style="margin-top:14px">
-      <div class="field">
-        <label>% Cassino</label>
-        <input type="number" id="pct_casino" placeholder="Ex: 95" min="0" max="100" onchange="resubstituteNarrative()">
-        <span class="hint">Percentual da atividade em jogos de cassino</span>
-      </div>
-      <div class="field">
-        <label>% Apostas Esportivas</label>
-        <input type="number" id="pct_esportivo" placeholder="Ex: 5" min="0" max="100" onchange="resubstituteNarrative()">
-      </div>
-    </div>
-  </div>
-
-  <!-- BLOCO 2: HISTORICO -->
-  <div class="card">
-    <div class="card-title">2 — Histórico Acumulado do Cliente (HISTORICO)</div>
-    <p class="hint" style="margin-bottom:12px">Relatório com totais acumulados desde o início da conta. Mesmas colunas que MENSUAL mas com todo o histórico.</p>
-    <div class="file-upload-area" style="margin-bottom:14px">
-      <label class="file-upload-label">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="14" rx="2" stroke="#FF4500" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <div><span>Histórico acumulado da conta (.xlsx)</span><small>Excel exportado do BI com totais desde o início da conta</small></div>
-        <input type="file" id="file_historico" accept=".xlsx,.xls,.csv" onchange="parseHistorico(this)">
-      </label>
-      <div class="file-list" id="list-historico"></div>
-    </div>
-    <div class="grid-4" id="historico-fields" style="display:none">
       <div class="field">
         <label>Depósitos Totais (R$)</label>
         <input type="number" id="dep_total" placeholder="0.00" min="0" step="0.01">
@@ -555,34 +569,23 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <label>Prêmios Totais (R$)</label>
         <input type="number" id="premios_total" placeholder="0.00" min="0" step="0.01">
       </div>
-
     </div>
-    <div id="historico-parsed-ok" style="display:none;margin-top:10px" class="inline-alert" style="background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span id="historico-parsed-msg"></span>
-    </div>
-  </div>
-
-  <!-- BLOCO 3: DETALLE HISTORICO -->
-  <div class="card">
-    <div class="card-title">3 — Detalhe por Data — Overview (DETALLE HISTORICO)</div>
-    <p class="hint" style="margin-bottom:12px">Relatório diário com depósitos e retiradas por data. Colunas: <em>Date, Deposit Local Curr, Withdrawal Local Curr.</em> Usado para construir a tabela mensal e o overview transacional.</p>
-    <div class="file-upload-area" style="margin-bottom:14px">
-      <label class="file-upload-label">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="14" rx="2" stroke="#FF4500" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <div><span>Detalhe diário de transações (.xlsx)</span><small>Excel exportado do BI com movimentações por data para o overview</small></div>
-        <input type="file" id="file_detalle" accept=".xlsx,.xls,.csv" onchange="parseDetalle(this)">
-      </label>
-      <div class="file-list" id="list-detalle"></div>
-    </div>
-    <div id="detalle-parsed-ok" style="display:none;margin-top:10px" class="inline-alert" style="background:#F0FFF4;border:1px solid #BBF7D0;color:#14532D">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#22C55E" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span id="detalle-parsed-msg"></span>
-    </div>
-    <!-- Preview tabla mensual auto-generada -->
+    <!-- Monthly table auto-generated -->
     <div id="detalle-table-wrap" style="display:none;margin-top:14px;overflow-x:auto">
       <div class="card-title" style="margin-bottom:8px">Tabela Transacional Mensal — gerada automaticamente</div>
       <table class="month-table" id="monthTable"></table>
+    </div>
+    <!-- % cassino / esportivo -->
+    <div class="grid-2" style="margin-top:14px">
+      <div class="field">
+        <label>% Cassino</label>
+        <input type="number" id="pct_casino" placeholder="Ex: 95" min="0" max="100" onchange="resubstituteNarrative()">
+        <span class="hint">Percentual da atividade em jogos de cassino</span>
+      </div>
+      <div class="field">
+        <label>% Apostas Esportivas</label>
+        <input type="number" id="pct_esportivo" placeholder="Ex: 5" min="0" max="100" onchange="resubstituteNarrative()">
+      </div>
     </div>
   </div>
 
@@ -678,17 +681,28 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
 
   <div class="card">
     <div class="card-title">Upload — Informe de Buscas de Risco</div>
-    <p class="hint" style="margin-bottom:12px">Adjunte o relatório gerado pelo sistema de consulta. Será incluído no PDF final.</p>
+    <p class="hint" style="margin-bottom:12px">Adjunte o relatório PDF gerado pelo sistema de consulta. O sistema extrairá automaticamente: situação laboral, renda estimada, status PEP e coincidências em listas internacionais.</p>
     <div class="file-upload-area">
       <label class="file-upload-label">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3v9M7 9l3 3 3-3" stroke="#FF4500" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="14" width="14" height="3" rx="1" stroke="#FF4500" stroke-width="1.5"/></svg>
         <div>
-          <span>Informe de Buscas (PDF ou imagem)</span>
-          <small>PDF, JPG, PNG — máx. 10MB por arquivo</small>
+          <span>Informe de Buscas (PDF)</span>
+          <small>PDF do sistema de inteligência — extração automática de dados</small>
         </div>
-        <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="addFiles(this,'list-buscas')">
+        <input type="file" accept=".pdf" onchange="parsePdfBusca(this)" id="file_busca_pdf">
       </label>
       <div class="file-list" id="list-buscas"></div>
+    </div>
+    <!-- Auto-extracted data box -->
+    <div id="pdf-extract-box" class="pdf-extract-box" style="display:none">
+      <div class="pdf-extract-title">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#7C3AED" stroke-width="1.5"/><path d="M7 4v3l2 1" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Dados extraídos automaticamente
+      </div>
+      <div id="pdf-extract-rows"></div>
+      <div style="margin-top:10px;font-size:11px;color:#7C3AED">
+        ✓ Dados incorporados ao texto narrativo e aos fundamentos. Revise e ajuste conforme necessário.
+      </div>
     </div>
   </div>
 
@@ -1329,20 +1343,23 @@ async function parseDetalle(input) {
 
 // ── Build month table from parsed data ──
 function buildMonthTableFromData(monthly) {
-  // Filter out invalid keys (NaN, out-of-range years) before building table
+  // Filter out invalid keys (NaN, out-of-range years)
   const validKeys = Object.keys(monthly).filter(k => {
     const yr = parseInt(k.split('-')[0]);
     return !isNaN(yr) && yr >= 2020 && yr <= 2035;
   });
-  const allYears = [...new Set(validKeys.map(k=>parseInt(k.split('-')[0])))].sort();
-  const years = allYears.length ? allYears : [2025, 2026];
-  if (!years.includes(2025) && years[0] > 2025) years.unshift(2025);
-  if (!years.includes(2026)) years.push(2026);
+
+  // Always show current year and previous year at minimum
+  const currentYear = new Date().getFullYear();
+  const dataYears = [...new Set(validKeys.map(k => parseInt(k.split('-')[0])))].sort();
+  const years = new Set([currentYear - 1, currentYear]);
+  dataYears.forEach(y => years.add(y));
+  const sortedYears = [...years].filter(y => !isNaN(y) && y >= 2020 && y <= 2035).sort();
 
   let html = `<thead><tr><th style="text-align:left;min-width:80px;padding:6px 8px">Tipo</th>`;
   MONTHS.forEach(m => html += `<th>${m}</th>`);
   html += '</tr></thead><tbody>';
-  years.forEach(yr => {
+  sortedYears.forEach(yr => {
     html += `<tr><td colspan="13" class="yr-header">${yr}</td></tr>`;
     ['dep','ret'].forEach(type => {
       html += `<tr><td style="font-weight:700;font-size:11px;color:var(--gray);padding:5px 8px;background:#FAFAFA;white-space:nowrap">${type==='dep'?'Depósitos':'Retiradas'}</td>`;
@@ -1436,6 +1453,7 @@ function onTipoCasoChange() {
   const ta = document.getElementById('texto_narrativo');
   let texto = TEXTO_BASE[tipos[0]] || '';
   texto = substituteFields(texto);
+  texto = enrichNarrativeWithPdf(texto);
   ta.value = texto;
 }
 
@@ -1493,6 +1511,45 @@ function substituteFields(texto) {
     .replace(/\[DATA_INICIO\]/g, fmt('data_inicio') || '[DATA_INICIO]')
     .replace(/\[DATA_FIM\]/g, fmt('data_fim') || '[DATA_FIM]')
     .replace(/\[DATA_ALERTA_INTERNO\]/g, fmt('data_inicio') || '[DATA_ALERTA]');
+}
+
+// Enrich narrative with PDF busca data
+function enrichNarrativeWithPdf(texto) {
+  const d = window.pdfBuscaData || {};
+  if (!d.incomeRange && !d.employed && !d.financialRiskLevel) return texto;
+
+  // Build the BigData enrichment sentence
+  const parts = [];
+  if (d.employed === 'No') {
+    parts.push('o cliente não possui vínculo empregatício ativo');
+  } else if (d.employed === 'Yes' && d.currentEmployer) {
+    parts.push(`o cliente possui vínculo empregatício ativo em ${d.currentEmployer}`);
+  }
+  if (d.incomeRange) parts.push(`renda individual estimada na faixa de ${d.incomeRange}`);
+  if (d.familyIncome) parts.push(`renda familiar total de ${d.familyIncome}`);
+  if (d.totalAssets) parts.push(`patrimônio total estimado ${d.totalAssets.toLowerCase()}`);
+  if (d.financialRiskLevel) parts.push(`score de risco financeiro nível ${d.financialRiskLevel}${d.financialRiskScore ? ' (' + d.financialRiskScore + ' pontos)' : ''}`);
+
+  if (!parts.length) return texto;
+
+  const enrichSentence = `De acordo com consulta realizada ao BigData Corp, ${parts.join(', ')}. Referido perfil econômico é incompatível com o volume de movimentações registrado na plataforma.`;
+
+  // Replace the target paragraph — inject after the occupation/source sentence
+  // Pattern covers both "não respondeu" and "corroborar" variants
+  texto = texto.replace(
+    /(declarando que os recursos utilizados na plataforma seriam provenientes de [^.]+\.[^]*?)(Não obstante[^.]+\.|não foi possível corroborar[^.]+\.|Contudo[^.]+\.)/,
+    (match, before, notObstante) => `${before}${notObstante}\n\n${enrichSentence}`
+  );
+
+  // Fallback: if pattern didn't match, append after the first mention of FONTE_FUNDOS sentence
+  if (!texto.includes('BigData Corp')) {
+    texto = texto.replace(
+      /(declarando que os recursos utilizados na plataforma seriam provenientes de [^\n]+\.)/,
+      `$1\n\n${enrichSentence}`
+    );
+  }
+
+  return texto;
 }
 
 // Re-run substitution on already-filled narrative when dates change
@@ -1916,20 +1973,43 @@ async function generatePDF() {
   opsRow('Retiradas','BRL',fmtInt(v('qtd_ret')),fmtNum('val_ret'),true);
   y+=2;
   orangeSubBar('Avaliação de Risco / Resumo do Jogador');
-  y+=2;
+  y+=4;
 
-  // Narrative
+  // Narrative — render each paragraph with indent, spacing and alternating subtle bg
   const texto=v('texto_narrativo');
   if(texto){
     const paras=texto.split('\n\n').filter(p=>p.trim());
-    paras.forEach(para=>{
-      const lines=doc.splitTextToSize(para.trim(),cw);
-      const h=lines.length*4.5+4;
+    paras.forEach((para, idx)=>{
+      const trimmed = para.trim();
+      const lines=doc.splitTextToSize(trimmed, cw - 6);
+      const h = lines.length * 4.6 + 7;
       check(h);
-      sf(7.5,false,30,30,30); doc.text(lines,ML,y); y+=h;
+
+      // Alternating light background per paragraph
+      if(idx % 2 === 0){
+        doc.setFillColor(252,252,252);
+      } else {
+        doc.setFillColor(248,248,255);
+      }
+      doc.roundedRect(ML, y, cw, h - 2, 1, 1, 'F');
+
+      // Left accent bar
+      doc.setFillColor(255,69,0);
+      doc.rect(ML, y, 2, h - 2, 'F');
+
+      // Paragraph number badge
+      doc.setFillColor(240,240,240);
+      doc.roundedRect(ML + 4, y + 2, 5, 4, 0.5, 0.5, 'F');
+      sf(5.5, true, 120,120,120);
+      doc.text(String(idx + 1), ML + 6.5, y + 5.2, {align:'center'});
+
+      // Paragraph text with indent
+      sf(7.5, false, 30,30,30);
+      doc.text(lines, ML + 11, y + 5);
+      y += h;
     });
   }
-  y+=4;
+  y+=6;
 
   // — Visão Geral —
   newPage();
@@ -1970,6 +2050,42 @@ async function generatePDF() {
     sf(7,true,80,80,80); doc.text('Observações:',ML+2,y); y+=5;
     const oL=doc.splitTextToSize(v('obs_buscas'),cw);
     check(oL.length*4+3); sf(7.5,false,30,30,30); doc.text(oL,ML+2,y); y+=oL.length*4+4;
+  }
+
+  // BigData Corp extracted data box
+  const bd = window.pdfBuscaData || {};
+  if (bd.employed || bd.incomeRange || bd.financialRiskLevel) {
+    y+=3; check(8);
+    // Purple header bar
+    doc.setFillColor(124,58,237);
+    doc.roundedRect(ML,y,cw,6.5,1,1,'F');
+    sf(7,true,255,255,255);
+    doc.text('Dados Extraídos — BigData Corp',ML+3,y+4.5);
+    y+=8;
+    const bdRows=[
+      ['Situação Empregatícia', bd.employed==='Yes'?'Empregado':bd.employed==='No'?'Não empregado':'—'],
+      bd.currentEmployer ? ['Empregador Atual', bd.currentEmployer] : null,
+      ['Renda Individual Estimada', bd.incomeRange||'—'],
+      ['Renda Familiar Total', bd.familyIncome||'—'],
+      ['Patrimônio Total Estimado', bd.totalAssets||'—'],
+      ['Fonte Principal de Renda', bd.mainIncomeSource||'—'],
+      ['Score de Risco Financeiro', bd.financialRiskLevel ? `Nível ${bd.financialRiskLevel}${bd.financialRiskScore?' ('+bd.financialRiskScore+' pts)':''}` : '—'],
+      ['Ocorrências em Cobranças', bd.collections||'0'],
+      ['PEP', bd.isPep==='Yes'?'POSITIVO':bd.isPep==='No'?'Negativo':'—'],
+      ['Sancionado', bd.currentlySanctioned==='Yes'?'SIM':bd.currentlySanctioned==='No'?'Não':'—'],
+    ].filter(Boolean);
+    bdRows.forEach((r,i)=>{
+      check(6);
+      const bg = i%2===0?[250,247,255]:[255,255,255];
+      doc.setFillColor(...bg);
+      doc.rect(ML,y,cw,6,'F');
+      doc.setDrawColor(220,210,250);
+      doc.rect(ML,y,cw,6,'S');
+      sf(6.5,true,100,80,140); doc.text(r[0],ML+2,y+4);
+      sf(6.5,false,30,20,60); doc.text(String(r[1]),ML+cw-2,y+4,{align:'right'});
+      y+=6;
+    });
+    y+=4;
   }
 
   const repPrevEl=document.querySelector('input[name="rep_previo"]:checked');
@@ -2228,16 +2344,726 @@ async function generateWord() {
 
 
 // ══════════════════════════════════════════
-// RESET
+// DATABASE — localStorage
+// ══════════════════════════════════════════
+let clientDB = null; // array of client objects
+
+function initDB() {
+  try {
+    // Try chunked storage first
+    const meta = localStorage.getItem('bw_client_db_meta');
+    if (!meta) return;
+    const info = JSON.parse(meta);
+    if (!info.chunks) return;
+    let combined = '';
+    for (let i = 0; i < info.chunks; i++) {
+      const chunk = localStorage.getItem('bw_client_db_' + i);
+      if (!chunk) { clientDB = null; return; }
+      combined += chunk;
+    }
+    clientDB = JSON.parse(combined);
+    setDbStatus('loaded', `Base carregada — ${clientDB.length.toLocaleString('pt-BR')} clientes${info.date ? ' · ' + info.date : ''}`);
+  } catch(e) { clientDB = null; }
+}
+
+function setDbStatus(state, text) {
+  const dot = document.getElementById('dbDot');
+  const txt = document.getElementById('dbText');
+  dot.className = 'db-dot ' + (state === 'loaded' ? 'loaded' : state === 'loading' ? 'loading' : '');
+  txt.className = 'db-text ' + (state === 'loaded' ? 'loaded' : '');
+  txt.textContent = text;
+}
+
+function normalizeId(raw) {
+  if (raw === null || raw === undefined || raw === '') return '';
+  if (typeof raw === 'number') return String(Math.round(raw));
+  return String(raw).trim().replace(/\.0+$/, '').replace(/,0+$/, '');
+}
+
+// Normalize date coming from XLSX.js — handles Date objects, Excel serials, and strings
+function normalizeDate(raw) {
+  if (!raw || raw === 'NaT' || raw === 'null' || raw === 'undefined') return '';
+  // Already a JS Date object (XLSX with cellDates:true)
+  if (raw instanceof Date && !isNaN(raw.getTime())) {
+    const y = raw.getFullYear();
+    const m = String(raw.getMonth() + 1).padStart(2, '0');
+    const d = String(raw.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  // Excel serial number (number > 10000)
+  if (typeof raw === 'number' && raw > 10000) {
+    const date = new Date(Math.round((raw - 25569) * 86400 * 1000));
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(date.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  // String — extract just YYYY-MM-DD
+  const s = String(raw).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0, 10);
+  if (/^\d{2}\/\d{2}\/\d{4}/.test(s)) {
+    const [d, m, y] = s.split('/'); return `${y}-${m}-${d}`;
+  }
+  return '';
+}
+
+async function loadDatabase(input) {
+  const file = input.files[0]; if (!file) return;
+  input.value = '';
+  setDbStatus('loading', 'Lendo arquivo...');
+  try {
+    const wb = await readWorkbook(file);
+    setDbStatus('loading', 'Processando registros...');
+    await new Promise(r => setTimeout(r, 50)); // allow UI update
+
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval: null, raw: true});
+    if (!rows.length) { setDbStatus('', 'Arquivo vazio ou formato não reconhecido'); return; }
+
+    // Build compact array — only fields we need
+    clientDB = rows.map(r => ({
+      i: normalizeId(r['PartyID'] || r['partyid'] || r['PARTYID']),
+      c: String(r['CPF'] || r['cpf'] || '').replace(/\D/g,''),
+      f: String(r['First Name'] || '').trim(),
+      l: String(r['Last Name'] || '').trim(),
+      o: String(r['Occupation'] || '').trim().normalize('NFC'),
+      b: normalizeDate(r['Birthdate'] || r['birthdate']),
+      p: String(r['Is Pep'] || '').trim(),
+      n: String(r['Nationality'] || '').trim(),
+      a: String(r['Full Address'] || '').trim(),
+      s: String(r['Account Active'] || r['Account Status'] || '').trim(),
+      r: normalizeDate(r['Registration Date'] || r['registration_date']),
+      t: normalizeDate(r['FTD Date'] || r['ftd_date']),
+    }));
+
+    setDbStatus('loading', `${clientDB.length.toLocaleString('pt-BR')} registros — salvando...`);
+    await new Promise(r => setTimeout(r, 50));
+
+    // Save in chunks of ~400KB to avoid localStorage quota
+    const CHUNK = 400000;
+    const json = JSON.stringify(clientDB);
+    const numChunks = Math.ceil(json.length / CHUNK);
+    try {
+      // Clear old chunks
+      for (let i = 0; i < 50; i++) localStorage.removeItem('bw_client_db_' + i);
+      for (let i = 0; i < numChunks; i++) {
+        localStorage.setItem('bw_client_db_' + i, json.slice(i * CHUNK, (i + 1) * CHUNK));
+      }
+      localStorage.setItem('bw_client_db_meta', JSON.stringify({
+        date: new Date().toLocaleDateString('pt-BR'),
+        count: clientDB.length,
+        chunks: numChunks
+      }));
+    } catch(e) {
+      // localStorage full — keep only in memory, still works this session
+      console.warn('localStorage quota exceeded, DB kept in memory only');
+    }
+
+    setDbStatus('loaded', `Base carregada — ${clientDB.length.toLocaleString('pt-BR')} clientes · ${new Date().toLocaleDateString('pt-BR')}`);
+  } catch(e) {
+    setDbStatus('', 'Erro: ' + e.message);
+    console.error(e);
+  }
+}
+
+// Expand compact client record to full object
+function expandClient(c) {
+  return {
+    partyId: c.i, cpf: c.c, firstName: c.f, lastName: c.l,
+    occupation: c.o, birthdate: c.b, isPep: c.p, nationality: c.n,
+    address: c.a, accountStatus: c.s, registrationDate: c.r, ftdDate: c.t,
+  };
+}
+
+function onIdChange() {
+  // Clear autofill banner if user edits manually
+  document.getElementById('autofill-banner').style.display = 'none';
+}
+
+function lookupClient() {
+  const rawInput = (document.getElementById('id_grupo').value || '').trim();
+  if (!rawInput) { alert('Digite o ID do cliente primeiro.'); return; }
+  if (!clientDB || !clientDB.length) { alert('Base de clientes não carregada. Use o botão "Carregar / Atualizar DB" no topo da página.'); return; }
+
+  const idVal = normalizeId(rawInput);
+  const cleanDigits = rawInput.replace(/\D/g, '');
+
+  const raw = clientDB.find(c =>
+    c.i === idVal ||
+    c.i === cleanDigits ||
+    c.c === cleanDigits
+  );
+
+  if (!raw) {
+    document.getElementById('autofill-banner').style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 14px;background:#FFF3EF;border:1px solid #FFB8A0;border-radius:6px;font-size:12.5px;color:#CC3700';
+    document.getElementById('autofill-msg').textContent = `Cliente ID "${idVal}" não encontrado na base. Preencha os dados manualmente.`;
+    return;
+  }
+
+  fillClientFields(expandClient(raw));
+}
+
+function fillClientFields(c) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val && val !== 'null' && val !== 'undefined') el.value = val; };
+  const setSelect = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el || !val || val === 'null') return;
+    for (let opt of el.options) { if (opt.value === val || opt.text === val) { el.value = opt.value; return; } }
+  };
+
+  set('nome', c.firstName);
+  set('sobrenome', c.lastName);
+
+  // CPF formatting
+  const cpfRaw = c.cpf.replace(/\D/g,'');
+  if (cpfRaw.length === 11) {
+    set('cpf', cpfRaw.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'));
+  } else {
+    set('cpf', c.cpf);
+  }
+
+  // Birthdate — already normalized to YYYY-MM-DD by normalizeDate
+  if (c.birthdate && /^\d{4}-\d{2}-\d{2}$/.test(c.birthdate)) {
+    set('data_nasc', c.birthdate);
+  }
+
+  // Occupation — normalize unicode before comparing (DB uses NFD, HTML uses NFC)
+  if (c.occupation) {
+    const occNFC = c.occupation.normalize('NFC').trim();
+    const el = document.getElementById('atividade');
+    let matched = false;
+    for (let opt of el.options) {
+      if (!opt.value) continue;
+      const optNFC = opt.value.normalize('NFC').toLowerCase();
+      const occLower = occNFC.toLowerCase();
+      if (optNFC === occLower || occLower === optNFC) {
+        el.value = opt.value; matched = true; break;
+      }
+    }
+    if (!matched) {
+      // Try partial match as fallback
+      for (let opt of el.options) {
+        if (!opt.value) continue;
+        const optNFC = opt.value.normalize('NFC').toLowerCase();
+        const occLower = occNFC.toLowerCase();
+        if (occLower.includes(optNFC) || optNFC.includes(occLower)) {
+          el.value = opt.value; matched = true; break;
+        }
+      }
+    }
+    if (!matched) {
+      el.value = 'Outro';
+      toggleOutro('atividade', 'atividade_outro_wrap');
+      document.getElementById('atividade_outro').value = occNFC;
+    } else {
+      // Hide "outro" field if not needed
+      document.getElementById('atividade_outro_wrap').style.display = 'none';
+    }
+  }
+
+  // Address — try to parse city and UF from "BAIRRO, RUA, NUMERO" or "BAIRRO, CIDADE, ESTADO"
+  if (c.address) {
+    set('endereco', c.address);
+    const parts = c.address.split(',').map(p => p.trim());
+    // Try to detect UF at end
+    const last = parts[parts.length - 1];
+    if (last && last.length === 2) {
+      setSelect('estado_uf', last.toUpperCase());
+      if (parts.length >= 2) set('localidade', parts[parts.length - 2]);
+    }
+  }
+
+  // Nationality
+  if (c.nationality === 'BR' || c.nationality === 'Brasil' || c.nationality === 'Brazil') {
+    set('nacionalidade', 'Brasil');
+    set('pais_residencia', 'Brasil');
+  } else if (c.nationality) {
+    set('nacionalidade', c.nationality);
+  }
+
+  // Account status — map DB values to dropdown options
+  if (c.accountStatus) {
+    const statusMap = {
+      'active':    'Active',
+      'suspended': 'Suspensa',
+      'blocked':   'Bloqueada',
+      'cancelled': 'Cancelada',
+      'canceled':  'Cancelada',
+      'bloqueada': 'Bloqueada',
+      'suspensa':  'Suspensa',
+      'cancelada': 'Cancelada',
+    };
+    const mapped = statusMap[c.accountStatus.toLowerCase()] || c.accountStatus;
+    const el = document.getElementById('situacao_conta');
+    if (el) {
+      for (let opt of el.options) {
+        if (opt.value === mapped || opt.value.toLowerCase() === mapped.toLowerCase()) {
+          el.value = opt.value; break;
+        }
+      }
+    }
+  }
+  // Registration date — pre-normalized
+  if (c.registrationDate && /^\d{4}-\d{2}-\d{2}$/.test(c.registrationDate)) {
+    set('data_cadastro', c.registrationDate);
+  }
+
+  // FTD date — pre-normalized
+  if (c.ftdDate && /^\d{4}-\d{2}-\d{2}$/.test(c.ftdDate)) {
+    set('data_primeiro_dep', c.ftdDate);
+  }
+
+  // PEP
+  if (c.isPep && c.isPep.toLowerCase() !== 'si' && c.isPep.toLowerCase() !== 'no') {
+    // keep as-is
+  }
+
+  // Show banner
+  document.getElementById('autofill-banner').style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 14px;background:#F0FFF4;border:1px solid #BBF7D0;border-radius:6px;font-size:12.5px;color:#14532D';
+  document.getElementById('autofill-msg').textContent = `✓ Dados preenchidos automaticamente para ${c.firstName} ${c.lastName} (ID ${c.partyId})`;
+}
+
+// ══════════════════════════════════════════
+// UNIFIED TRANSACTION PARSER
+// ══════════════════════════════════════════
+async function parseTransacoes(input) {
+  const file = input.files[0]; if (!file) return;
+  addFileItem('list-transacoes', file.name); input.value = '';
+  try {
+    const wb = await readWorkbook(file);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {defval: null, raw: true});
+    if (!rows.length) { showParseWarn('transacoes-parsed-ok','transacoes-parsed-msg','Arquivo vazio.'); return; }
+
+    const MM = {Jan:1,Fev:2,Feb:2,Mar:3,Apr:4,Abr:4,May:5,Mai:5,Jun:6,Jul:7,Aug:8,Ago:8,Sep:9,Set:9,Oct:10,Out:10,Nov:11,Dec:12,Dez:12};
+    const monthly = {};
+    let totalDep = 0, totalRet = 0, totalAp = 0, totalPrem = 0;
+    let qtdDep = 0, qtdRet = 0;
+    let periodoRows = [];
+
+    // Detect ref month from Step B
+    const mesRef = document.getElementById('mes_ref')?.value;
+    const anoRef = parseInt(document.getElementById('ano_ref')?.value || '0');
+    const mesRefNum = mesRef ? Object.entries(MM).find(([k]) => mesRef.startsWith(k))?.[1] : null;
+
+    rows.forEach(r => {
+      const myn = String(r['MonthYearName'] || '').trim().replace(/^'+/, '');
+      if (!myn || myn === 'Total' || myn.toLowerCase().startsWith('filtro')) return;
+      const p = myn.split(/[-\s]/);
+      const mo = MM[p[0]]; const yr = parseInt(p[1]);
+      if (!mo || !yr || isNaN(yr) || yr < 2020 || yr > 2035) return;
+
+      const dep  = (typeof r['Depositos'] === 'number' && isFinite(r['Depositos'])) ? r['Depositos'] : 0;
+      const ret  = (typeof r['Retiros'] === 'number' && isFinite(r['Retiros'])) ? r['Retiros'] : 0;
+      const ap   = (typeof r['Apuestas'] === 'number' && isFinite(r['Apuestas'])) ? r['Apuestas'] : 0;
+      const prem = (typeof r['Premios'] === 'number' && isFinite(r['Premios'])) ? r['Premios'] : 0;
+      const qd   = (typeof r['Cantidad Depositos'] === 'number' && isFinite(r['Cantidad Depositos'])) ? r['Cantidad Depositos'] : 0;
+      const qr   = (typeof r['Cantidad Retiros'] === 'number' && isFinite(r['Cantidad Retiros'])) ? r['Cantidad Retiros'] : 0;
+
+      totalDep += dep; totalRet += ret; totalAp += ap; totalPrem += prem;
+
+      const key = `${yr}-${String(mo).padStart(2,'0')}`;
+      if (!monthly[key]) monthly[key] = {dep:0, ret:0};
+      monthly[key].dep += dep;
+      monthly[key].ret += ret;
+
+      // Check if this row matches the analysis period
+      const isPeriodo = (mesRefNum && anoRef) ? (mo === mesRefNum && yr === anoRef) : false;
+      if (isPeriodo) {
+        periodoRows.push({dep, ret, ap, prem, qd, qr});
+      }
+    });
+
+    // Fill totals
+    setVal('dep_total', totalDep);
+    setVal('ret_total', totalRet);
+    setVal('apostas_total', totalAp);
+    setVal('premios_total', totalPrem);
+
+    // Fill period data if matched, otherwise use last non-zero month
+    let periDep = 0, periRet = 0, periAp = 0, periPrem = 0, periQd = 0, periQr = 0;
+    if (periodoRows.length) {
+      periodoRows.forEach(r => { periDep+=r.dep; periRet+=r.ret; periAp+=r.ap; periPrem+=r.prem; periQd+=r.qd; periQr+=r.qr; });
+    } else {
+      // fallback: last month with data
+      const sortedKeys = Object.keys(monthly).sort();
+      if (sortedKeys.length) {
+        const lastKey = sortedKeys[sortedKeys.length - 1];
+        periDep = monthly[lastKey].dep;
+        periRet = monthly[lastKey].ret;
+      }
+    }
+    setVal('qtd_dep', periQd);
+    setVal('val_dep', periDep);
+    setVal('qtd_ret', periQr);
+    setVal('val_ret', periRet);
+    setVal('apostas_periodo', periAp);
+    setVal('premios_periodo', periPrem);
+
+    // Build monthly table
+    window.monthTableData = monthly;
+    buildMonthTableFromData(monthly);
+    document.getElementById('detalle-table-wrap').style.display = 'block';
+    document.getElementById('transacoes-fields').style.display = 'grid';
+
+    const months = Object.keys(monthly).sort();
+    const periLabel = periodoRows.length ? ` — período ${mesRef}/${anoRef} identificado` : ' — período selecionado não encontrado, usando totais';
+    showParseOk('transacoes-parsed-ok','transacoes-parsed-msg',
+      `✓  ${months.length} meses (${months[0]} → ${months[months.length-1]})${periLabel}  |  Dep total ${fmtBRLs(totalDep)}  |  Ret total ${fmtBRLs(totalRet)}`);
+
+    resubstituteNarrative();
+  } catch(e) {
+    showParseWarn('transacoes-parsed-ok','transacoes-parsed-msg','Erro: ' + e.message);
+    console.error(e);
+  }
+}
+
+// ══════════════════════════════════════════
+// PDF BUSCAS — PARSER
+// ══════════════════════════════════════════
+// Store extracted data globally for narrative injection
+window.pdfBuscaData = {};
+
+async function parsePdfBusca(input) {
+  const file = input.files[0]; if (!file) return;
+  const fakeInput = {files: [file]};
+  addFiles(fakeInput, 'list-buscas');
+  input.value = '';
+
+  const box = document.getElementById('pdf-extract-box');
+  const rows = document.getElementById('pdf-extract-rows');
+  box.style.display = 'block';
+  rows.innerHTML = '<div style="color:#7C3AED;font-size:12px;padding:8px 0">⏳ Lendo PDF...</div>';
+
+  try {
+    const text = await extractPdfTextPdfJs(file);
+    const data = parseBuscaText(text);
+    window.pdfBuscaData = data;
+    renderPdfExtract(data);
+    applyBuscaToForm(data);
+  } catch(err) {
+    rows.innerHTML = `<div style="color:#E53935;font-size:12px;padding:8px 0">Erro: ${err.message}</div>`;
+    console.error(err);
+  }
+}
+
+// Extract text using PDF.js (loaded from CDN)
+async function extractPdfTextPdfJs(file) {
+  // Dynamically load PDF.js if not already loaded
+  if (!window.pdfjsLib) {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({data: arrayBuffer}).promise;
+  let fullText = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items.map(item => item.str).join(' ');
+    fullText += pageText + '\n';
+  }
+  return fullText;
+}
+
+// Parse the extracted text — structured for BigData Corp report format
+function parseBuscaText(text) {
+  const data = {};
+
+  // Helper: find value after a label, on same or next line
+  const find = (patterns) => {
+    for (const pat of patterns) {
+      const m = text.match(pat);
+      if (m && m[1] && m[1].trim()) return m[1].trim();
+    }
+    return null;
+  };
+
+  // Employment — "Is Currently Employed Yes/No" or "Employed Yes/No"
+  data.employed = find([
+    /Is Currently Employed\s+(Yes|No)/i,
+    /(?<!\w)Employed\s+(Yes|No)/i
+  ]);
+  // If multiple "Employed" hits, prefer "Is Currently Employed"
+  const empMatch = text.match(/Is Currently Employed\s+(Yes|No)/i);
+  if (empMatch) data.employed = empMatch[1];
+
+  // Income range
+  data.incomeRange = find([
+    /Estimated Income Range\s+([\w\s\dAa]+SM)/i,
+    /BIGDATA_V2\s+([\w\s\d]+SM)/i,
+    /BIGDATA\s+([\w\s\d]+SM)/i,
+  ]);
+
+  // Family income
+  data.familyIncome = find([/Total Family Income\s+([\w\s\d]+SM)/i]);
+
+  // Total assets
+  data.totalAssets = find([
+    /Total Assets\s+([\w\sÀ-ú\d]+?)(?=\s+Estimated|\s+Tax|\s+Is\s+Currently|\s+Last|\n)/i,
+    /Total assets\s+([\w\sÀ-ú\d]+?)(?=\s+Tax|\s+Estimated|\n)/i,
+  ]);
+
+  // PEP
+  const pepMatch = text.match(/Is Currently PEP\s+(Yes|No)/i);
+  data.isPep = pepMatch ? pepMatch[1] : null;
+
+  // Sanctioned
+  const sanctMatch = text.match(/Is Currently Sanctioned\s+(Yes|No)/i);
+  data.currentlySanctioned = sanctMatch ? sanctMatch[1] : 'No';
+
+  // Company owner
+  const ownerMatch = text.match(/Is Currently Company Owner\s+(Yes|No)/i);
+  data.companyOwner = ownerMatch ? ownerMatch[1] : null;
+
+  // Main income source
+  data.mainIncomeSource = find([/Main Income Source\s+([\w\s]+?)(?=\s+Is\s+Likely|\s+Number|\n)/i]);
+
+  // Financial risk
+  const riskLevelMatch = text.match(/Financial Risk Level\s+([A-Z])/i);
+  data.financialRiskLevel = riskLevelMatch ? riskLevelMatch[1] : null;
+  const riskScoreMatch = text.match(/Financial Risk Score\s+(\d+)/i);
+  data.financialRiskScore = riskScoreMatch ? riskScoreMatch[1] : null;
+
+  // Collections
+  const collMatch = text.match(/Collections Occurrences\s+(\d+)/i);
+  data.collections = collMatch ? collMatch[1] : null;
+
+  // Current employer — from Business Relationships or Professions
+  // Look for active employment relationship
+  const employerMatch = text.match(/Relationship Type EMPLOYMENT[\s\S]*?Is Currently Active Yes[\s\S]*?Name\s+([\w\sÀ-ú&]+?)(?=\s+Relationship|\s+Tax Id|\s+Total)/i) ||
+                        text.match(/Status ACTIVE[\s\S]*?Company Name\s+([\w\sÀ-ú&]+?)(?=\s+Area|\s+Level|\s+Status)/i);
+  if (employerMatch) data.currentEmployer = employerMatch[1].trim();
+
+  // Sector of current employment
+  const sectorMatch = text.match(/Status ACTIVE[\s\S]{0,50}?Sector\s+([\w\s\d\-À-ú]+?)(?=\s+Country|\s+Company)/i) ||
+                      text.match(/PRIVATE\s*-\s*\d+\s*-\s*([\w\sÀ-ú,]+?)(?=\s+Country|\s+Company|\s+Area)/i);
+  if (sectorMatch) data.currentSector = sectorMatch[1].trim().substring(0, 60);
+
+  // Sanctions — look for specific source blocks with match rates
+  data.sanctions = {INTERPOL: null, OFAC: null, FBI: null};
+  const interpols = [...text.matchAll(/Source interpol[\s\S]*?Match Rate (\d+)/gi)];
+  interpols.forEach(m => {
+    const r = parseInt(m[1]);
+    if (r >= 50 && (data.sanctions.INTERPOL === null || r > data.sanctions.INTERPOL))
+      data.sanctions.INTERPOL = r;
+  });
+  const ofacs = [...text.matchAll(/Source ofac[\s\S]*?Match Rate (\d+)/gi)];
+  ofacs.forEach(m => {
+    const r = parseInt(m[1]);
+    if (r >= 50 && (data.sanctions.OFAC === null || r > data.sanctions.OFAC))
+      data.sanctions.OFAC = r;
+  });
+  const fbis = [...text.matchAll(/Source fbi[\s\S]*?Match Rate (\d+)/gi)];
+  fbis.forEach(m => {
+    const r = parseInt(m[1]);
+    if (r >= 25 && (data.sanctions.FBI === null || r > data.sanctions.FBI))
+      data.sanctions.FBI = r;
+  });
+
+  return data;
+}
+
+function renderPdfExtract(data) {
+  const box = document.getElementById('pdf-extract-box');
+  const rows = document.getElementById('pdf-extract-rows');
+  box.style.display = 'block';
+
+  const row = (label, value, cls = '') => `
+    <div class="pdf-field-row">
+      <span class="pdf-field-label">${label}</span>
+      <span class="pdf-field-value ${cls}">${value || '—'}</span>
+    </div>`;
+
+  const empClass = data.employed === 'No' ? 'warn' : 'ok';
+  const pepClass = data.isPep === 'Yes' ? 'alert' : 'ok';
+  const sanctions = data.sanctions || {};
+  const sanctCount = Object.values(sanctions).filter(v => v !== null).length;
+  const sanctClass = sanctCount > 0 ? 'warn' : 'ok';
+  const sanctText = sanctCount > 0
+    ? Object.entries(sanctions).filter(([,v]) => v !== null).map(([s,r]) => `${s} (match ${r}%)`).join(', ')
+    : 'Sem coincidências relevantes';
+
+  rows.innerHTML =
+    row('Situação Empregatícia', data.employed === 'Yes' ? 'Empregado' : data.employed === 'No' ? 'Não empregado' : null, empClass) +
+    (data.currentEmployer ? row('Empregador Atual', data.currentEmployer) : '') +
+    (data.currentSector ? row('Setor', data.currentSector) : '') +
+    row('Renda Estimada', data.incomeRange) +
+    row('Renda Familiar Total', data.familyIncome) +
+    row('Ativos Totais', data.totalAssets) +
+    row('Fonte Principal de Renda', data.mainIncomeSource) +
+    row('Proprietário de Empresa', data.companyOwner === 'Yes' ? 'Sim' : data.companyOwner === 'No' ? 'Não' : null) +
+    row('PEP', data.isPep === 'Yes' ? 'SIM — POLITICAMENTE EXPOSTO' : data.isPep === 'No' ? 'Negativo' : null, pepClass) +
+    row('Nível de Risco Financeiro', data.financialRiskLevel ? `${data.financialRiskLevel} (score ${data.financialRiskScore || '—'})` : null) +
+    row('Ocorrências em Cobranças', data.collections) +
+    row('Coincidências em Listas', sanctText, sanctClass);
+}
+
+function applyBuscaToForm(data) {
+  // Auto-set radio buttons based on PDF data
+  if (data.isPep === 'Yes') {
+    const pepP = document.getElementById('pep_p');
+    if (pepP) pepP.checked = true;
+  }
+
+  const sanctCount = Object.keys(data.sanctions || {}).length;
+  if (data.sanctions?.OFAC) {
+    const ofacP = document.getElementById('ofac_p');
+    if (ofacP) ofacP.checked = true;
+  }
+  if (data.sanctions?.INTERPOL || data.sanctions?.FBI) {
+    const terrP = document.getElementById('terr_p');
+    if (terrP) terrP.checked = true;
+  }
+
+  // Occupation enrichment — if employment info found and atividade is "Outro" or empty
+  const atEl = document.getElementById('atividade');
+  if (data.employed === 'No' && atEl && !atEl.value) {
+    // Try to set to Autônomo or leave for manual
+  }
+
+  // Fill observations with structured BigData Corp summary
+  const obsEl = document.getElementById('obs_buscas');
+  if (obsEl) {
+    const lines = [];
+
+    // Employment
+    if (data.employed === 'Yes' && data.currentEmployer) {
+      lines.push(`Vínculo empregatício: ativo em ${data.currentEmployer}${data.currentSector ? ' — ' + data.currentSector : ''}.`);
+    } else if (data.employed === 'No') {
+      lines.push('Vínculo empregatício: sem vínculo ativo (fonte: BigData Corp / RAIS).');
+    }
+
+    // Income
+    if (data.incomeRange) lines.push(`Renda individual estimada: ${data.incomeRange}.`);
+    if (data.familyIncome) lines.push(`Renda familiar total: ${data.familyIncome}.`);
+    if (data.totalAssets) lines.push(`Patrimônio total estimado: ${data.totalAssets}.`);
+    if (data.mainIncomeSource) lines.push(`Fonte principal de renda: ${data.mainIncomeSource}.`);
+
+    // Risk score
+    if (data.financialRiskLevel) {
+      lines.push(`Score de risco financeiro: nível ${data.financialRiskLevel}${data.financialRiskScore ? ' (' + data.financialRiskScore + ' pontos)' : ''}.`);
+    }
+
+    // Collections
+    if (data.collections && data.collections !== '0') {
+      lines.push(`Ocorrências em cobranças: ${data.collections}.`);
+    }
+
+    // Sanctions
+    const sanctions = data.sanctions || {};
+    const sanctEntries = Object.entries(sanctions).filter(([,v]) => v !== null);
+    if (sanctEntries.length > 0) {
+      const s = sanctEntries.map(([src,r]) => `${src} (match rate ${r}%)`).join('; ');
+      lines.push(`Coincidências em listas internacionais: ${s}. Verificar se correspondem ao titular da conta — nomes distintos e datas de nascimento divergentes.`);
+    } else {
+      lines.push('Listas internacionais (OFAC, INTERPOL, FBI): sem coincidências relevantes.');
+    }
+
+    // PEP
+    if (data.isPep === 'No') lines.push('PEP: negativo.');
+    else if (data.isPep === 'Yes') lines.push('PEP: POSITIVO — cliente identificado como Pessoa Politicamente Exposta.');
+
+    obsEl.value = lines.join('\n');
+  }
+
+  // Enrich narrative with occupation/income data
+  window.pdfBuscaData = data;
+  resubstituteNarrative();
+}
+
+// ══════════════════════════════════════════
+// RESET — clear DB state vars
 // ══════════════════════════════════════════
 function resetForm() {
-  document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"])').forEach(el => { if(!el.closest('.alert-chk')) el.value=''; });
-  document.querySelectorAll('select').forEach(el => el.selectedIndex=0);
-  document.querySelectorAll('textarea').forEach(el => el.value='');
-  document.querySelectorAll('.file-list').forEach(el => el.innerHTML='');
+  // Clear all text inputs (except those inside alert checkboxes)
+  document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"])').forEach(el => {
+    if (!el.closest('.alert-chk')) el.value = '';
+  });
+
+  // Reset all selects
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Clear all textareas
+  document.querySelectorAll('textarea').forEach(el => el.value = '');
+
+  // Uncheck all radios — reset to defaults
+  document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+  // Re-check default radios
+  const defaultRadios = ['ofac_n','pep_n','terr_n','gafi_n','rfb_n','media_n','rp_no'];
+  defaultRadios.forEach(id => { const el = document.getElementById(id); if (el) el.checked = true; });
+
+  // Uncheck all alert checkboxes (alertas do sistema)
+  document.querySelectorAll('.alert-chk input[type="checkbox"]').forEach(el => el.checked = false);
+
+  // Uncheck tipo caso checkboxes and reset their visual state
+  document.querySelectorAll('#tipo_caso_checks input[type="checkbox"]').forEach(el => {
+    el.checked = false;
+  });
+  document.querySelectorAll('#tipo_caso_checks label').forEach(lbl => {
+    lbl.style.borderColor = '';
+    lbl.style.background = '';
+  });
+  document.getElementById('tipo_caso').value = '';
+
+  // Hide artigos preview and narrative card
+  const artPrev = document.getElementById('artigos-preview');
+  if (artPrev) artPrev.style.display = 'none';
+  const cardNarr = document.getElementById('card-narrativa');
+  if (cardNarr) cardNarr.style.display = 'none';
+
+  // Clear all file lists
+  document.querySelectorAll('.file-list').forEach(el => el.innerHTML = '');
   Object.keys(fileStorage).forEach(k => delete fileStorage[k]);
-  document.getElementById('resultScreen').style.display='none';
-  document.getElementById('step-6').style.display='';
+
+  // Reset transactional fields and table
+  document.getElementById('transacoes-fields').style.display = 'none';
+  document.getElementById('transacoes-parsed-ok').style.display = 'none';
+  document.getElementById('detalle-table-wrap').style.display = 'none';
+  window.monthTableData = {};
+  buildMonthTable();
+
+  // Reset autofill banner
+  document.getElementById('autofill-banner').style.display = 'none';
+
+  // Reset PDF busca extracted box
+  const pdfBox = document.getElementById('pdf-extract-box');
+  if (pdfBox) pdfBox.style.display = 'none';
+  window.pdfBuscaData = {};
+
+  // Reset "outro" fields
+  document.getElementById('atividade_outro_wrap').style.display = 'none';
+  const atOutro = document.getElementById('atividade_outro');
+  if (atOutro) atOutro.value = '';
+  const ffWrap = document.getElementById('fonte_fundos_outro_wrap');
+  if (ffWrap) ffWrap.style.display = 'none';
+
+  // Reset reporte previo
+  document.getElementById('reporte-previo-fields').style.display = 'none';
+  document.getElementById('reportes-previos-list').innerHTML = '';
+  _rpCount = 0;
+
+  // Reset today's date fields
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('data_relatorio').value = today;
+  document.getElementById('data_busca').value = today;
+
+  // Reset default text fields
+  document.getElementById('nacionalidade').value = 'Brasil';
+  document.getElementById('pais_residencia').value = 'Brasil';
+  document.getElementById('analista').value = 'Amparo Zenoni';
+  document.getElementById('forma_pagamento').value = 'XP_W_BankTransfer';
+
+  // Hide result, show step 6, go to step 0
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('step-6').style.display = '';
   showStep(0);
 }
 
@@ -2251,6 +3077,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('data_relatorio').value = today;
   document.getElementById('data_busca').value = today;
+  initDB();
 });
 
 
