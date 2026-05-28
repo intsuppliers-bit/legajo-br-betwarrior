@@ -1975,37 +1975,27 @@ async function generatePDF() {
   orangeSubBar('Avaliação de Risco / Resumo do Jogador');
   y+=4;
 
-  // Narrative — render each paragraph with indent, spacing and alternating subtle bg
+  // Narrative — render each paragraph with left accent bar, no numbers, full width
   const texto=v('texto_narrativo');
   if(texto){
     const paras=texto.split('\n\n').filter(p=>p.trim());
     paras.forEach((para, idx)=>{
       const trimmed = para.trim();
-      const lines=doc.splitTextToSize(trimmed, cw - 6);
-      const h = lines.length * 4.6 + 7;
+      const lines=doc.splitTextToSize(trimmed, cw - 5);
+      const h = lines.length * 4.6 + 6;
       check(h);
 
-      // Alternating light background per paragraph
-      if(idx % 2 === 0){
-        doc.setFillColor(252,252,252);
-      } else {
-        doc.setFillColor(248,248,255);
-      }
-      doc.roundedRect(ML, y, cw, h - 2, 1, 1, 'F');
+      // Alternating light background
+      doc.setFillColor(idx % 2 === 0 ? 252 : 248, idx % 2 === 0 ? 252 : 248, idx % 2 === 0 ? 252 : 255);
+      doc.roundedRect(ML, y, cw, h - 1, 1, 1, 'F');
 
       // Left accent bar
-      doc.setFillColor(255,69,0);
-      doc.rect(ML, y, 2, h - 2, 'F');
+      doc.setFillColor(255, 69, 0);
+      doc.rect(ML, y, 2, h - 1, 'F');
 
-      // Paragraph number badge
-      doc.setFillColor(240,240,240);
-      doc.roundedRect(ML + 4, y + 2, 5, 4, 0.5, 0.5, 'F');
-      sf(5.5, true, 120,120,120);
-      doc.text(String(idx + 1), ML + 6.5, y + 5.2, {align:'center'});
-
-      // Paragraph text with indent
-      sf(7.5, false, 30,30,30);
-      doc.text(lines, ML + 11, y + 5);
+      // Paragraph text — starts right after the accent bar with small padding
+      sf(7.5, false, 30, 30, 30);
+      doc.text(lines, ML + 5, y + 4.8);
       y += h;
     });
   }
