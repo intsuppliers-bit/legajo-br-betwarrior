@@ -1974,8 +1974,18 @@ async function generatePDF() {
   row2('Atividade',vOcup()||'–','Fonte de Fundos',vFonte()||'–');
   row2('Data Cadastro',fmtDate('data_cadastro'),'Situação Conta',v('situacao_conta')||'–');
   y+=1;
-  flagRow('Condição — Pessoa Politicamente Exposta', 'PEP Não', false);
-  flagRow('Listas de Sanções / Terroristas', 'Não', false);
+  // PEP — read from radio button (set by parsePdfBusca or manually)
+  const pepRadioP = document.getElementById('pep_p');
+  const isPepPositive = pepRadioP && pepRadioP.checked;
+  const pepBadgeText = isPepPositive ? 'PEP SIM' : 'PEP Não';
+  flagRow('Condição — Pessoa Politicamente Exposta', pepBadgeText, isPepPositive);
+
+  // Sanctions — read from radio buttons
+  const ofacP = document.getElementById('ofac_p');
+  const terrP = document.getElementById('terr_p');
+  const isSanctioned = (ofacP && ofacP.checked) || (terrP && terrP.checked);
+  const sanctBadgeText = isSanctioned ? 'Sim' : 'Não';
+  flagRow('Listas de Sanções / Terroristas', sanctBadgeText, isSanctioned);
 
   sep();
 
