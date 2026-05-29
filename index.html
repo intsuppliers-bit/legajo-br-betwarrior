@@ -2373,20 +2373,20 @@ async function generateWord() {
 
 
 // ══════════════════════════════════════════
-// DATABASE — localStorage
+// DATABASE — sessionStorage
 // ══════════════════════════════════════════
 let clientDB = null; // array of client objects
 
 function initDB() {
   try {
     // Try chunked storage first
-    const meta = localStorage.getItem('bw_client_db_meta');
+    const meta = sessionStorage.getItem('bw_client_db_meta');
     if (!meta) return;
     const info = JSON.parse(meta);
     if (!info.chunks) return;
     let combined = '';
     for (let i = 0; i < info.chunks; i++) {
-      const chunk = localStorage.getItem('bw_client_db_' + i);
+      const chunk = sessionStorage.getItem('bw_client_db_' + i);
       if (!chunk) { clientDB = null; return; }
       combined += chunk;
     }
@@ -2467,24 +2467,24 @@ async function loadDatabase(input) {
     setDbStatus('loading', `${clientDB.length.toLocaleString('pt-BR')} registros — salvando...`);
     await new Promise(r => setTimeout(r, 50));
 
-    // Save in chunks of ~400KB to avoid localStorage quota
+    // Save in chunks of ~400KB to avoid sessionStorage quota
     const CHUNK = 400000;
     const json = JSON.stringify(clientDB);
     const numChunks = Math.ceil(json.length / CHUNK);
     try {
       // Clear old chunks
-      for (let i = 0; i < 50; i++) localStorage.removeItem('bw_client_db_' + i);
+      for (let i = 0; i < 50; i++) sessionStorage.removeItem('bw_client_db_' + i);
       for (let i = 0; i < numChunks; i++) {
-        localStorage.setItem('bw_client_db_' + i, json.slice(i * CHUNK, (i + 1) * CHUNK));
+        sessionStorage.setItem('bw_client_db_' + i, json.slice(i * CHUNK, (i + 1) * CHUNK));
       }
-      localStorage.setItem('bw_client_db_meta', JSON.stringify({
+      sessionStorage.setItem('bw_client_db_meta', JSON.stringify({
         date: new Date().toLocaleDateString('pt-BR'),
         count: clientDB.length,
         chunks: numChunks
       }));
     } catch(e) {
-      // localStorage full — keep only in memory, still works this session
-      console.warn('localStorage quota exceeded, DB kept in memory only');
+      // sessionStorage full — keep only in memory, still works this session
+      console.warn('sessionStorage quota exceeded, DB kept in memory only');
     }
 
     setDbStatus('loaded', `Base carregada — ${clientDB.length.toLocaleString('pt-BR')} clientes · ${new Date().toLocaleDateString('pt-BR')}`);
