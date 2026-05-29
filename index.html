@@ -186,6 +186,14 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
 .pdf-field-value.warn{color:#F59E0B}
 .pdf-field-value.ok{color:var(--success)}
 .pdf-field-value.alert{color:var(--error)}
+
+/* ── REPORTE PREVIO BUTTONS ── */
+.btn-add-entry{background:none;border:1.5px dashed var(--or);color:var(--or);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;text-transform:uppercase;padding:10px 18px;border-radius:var(--radius);cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;transition:all .15s}
+.btn-add-entry:hover{background:var(--or-light)}
+.btn-remove-entry{background:none;border:1px solid #ddd;color:#999;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:4px;cursor:pointer;transition:all .15s}
+.btn-remove-entry:hover{border-color:var(--error);color:var(--error)}
+.entry-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.entry-num{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--or)}
 /* ── RESPONSIVE ── */
 @media(max-width:640px){
   .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
@@ -1163,6 +1171,20 @@ function validateStep(step) {
       if (field) field.classList.remove('show-err');
     }, { once: true });
   });
+  // Step 4 special: require at least one tipo_caso checked
+  if (step === 4) {
+    const tipos = getSelectedTipos ? getSelectedTipos() : [];
+    if (!tipos.length) {
+      const tipoCasoEl = document.getElementById('tipo_caso_checks');
+      if (tipoCasoEl) {
+        tipoCasoEl.style.outline = '2px solid var(--error)';
+        tipoCasoEl.style.borderRadius = '6px';
+        setTimeout(() => { tipoCasoEl.style.outline = ''; }, 3000);
+        tipoCasoEl.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+      ok = false;
+    }
+  }
   if (!ok) {
     const firstErr = document.querySelector('#step-' + step + ' .error');
     if (firstErr) firstErr.scrollIntoView({behavior:'smooth', block:'center'});
@@ -1543,10 +1565,17 @@ function enrichNarrativeWithPdf(texto) {
 
   // Fallback: if pattern didn't match, append after the first mention of FONTE_FUNDOS sentence
   if (!texto.includes('BigData Corp')) {
-    texto = texto.replace(
-      /(declarando que os recursos utilizados na plataforma seriam provenientes de [^\n]+\.)/,
-      `$1\n\n${enrichSentence}`
-    );
+    // Try inserting after the occupation/funds paragraph
+    const insertAfter = 'Portaria SPA/MF nº 1.143/2024 e demais normativos aplicáveis.';
+    if (texto.includes(insertAfter)) {
+      texto = texto.replace(insertAfter, insertAfter + '\n\n' + enrichSentence);
+    } else {
+      // Last resort: append at end of second paragraph
+      texto = texto.replace(
+        /(declarando que os recursos utilizados na plataforma seriam provenientes de [^.]+\.)/,
+        `$1\n\n${enrichSentence}`
+      );
+    }
   }
 
   return texto;
@@ -2715,8 +2744,11 @@ window.pdfBuscaData = {};
 
 async function parsePdfBusca(input) {
   const file = input.files[0]; if (!file) return;
-  const fakeInput = {files: [file]};
-  addFiles(fakeInput, 'list-buscas');
+  // Add file item to list
+  const listEl = document.getElementById('list-buscas');
+  if (listEl) {
+    listEl.innerHTML = `<div class="file-item"><span class="fi-icon">✓</span><span class="fi-name">${file.name}</span></div>`;
+  }
   input.value = '';
 
   const box = document.getElementById('pdf-extract-box');
@@ -2787,18 +2819,18 @@ function parseBuscaText(text) {
 
   // Income range
   data.incomeRange = find([
-    /Estimated Income Range\s+([\w\s\dAa]+SM)/i,
-    /BIGDATA_V2\s+([\w\s\d]+SM)/i,
-    /BIGDATA\s+([\w\s\d]+SM)/i,
+    /Estimated Income Range\s+([0-9A-Za-z][\w\s]*?SM)/i,
+    /BIGDATA_V2\s+([0-9][\w\s]*?SM)/i,
+    /BIGDATA\s+([0-9][\w\s]*?SM)/i,
   ]);
 
   // Family income
-  data.familyIncome = find([/Total Family Income\s+([\w\s\d]+SM)/i]);
+  data.familyIncome = find([/Total Family Income\s+([0-9A-Za-z][\w\s]*?SM)/i]);
 
   // Total assets
   data.totalAssets = find([
-    /Total Assets\s+([\w\sÀ-ú\d]+?)(?=\s+Estimated|\s+Tax|\s+Is\s+Currently|\s+Last|\n)/i,
-    /Total assets\s+([\w\sÀ-ú\d]+?)(?=\s+Tax|\s+Estimated|\n)/i,
+    /Total [Aa]ssets\s+([A-ZÀ-Ú][\w\sÀ-ú\d]*?)(?=\s{2,}|\s+Estimated|\s+Tax Id|\s+Is Currently|\s+Last|\n)/i,
+    /Total assets\s+([A-ZÀ-Ú][\w\sÀ-ú\d]*?)(?=\s{2,}|\s+Tax|\s+Estimated|\n)/i,
   ]);
 
   // PEP
