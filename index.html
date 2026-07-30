@@ -782,6 +782,33 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     </div>
   </div>
 
+  <div class="card">
+    <div class="card-title">Atividade em Outras Plataformas</div>
+    <div class="inline-alert info">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#3B82F6" stroke-width="1.5"/><path d="M9 8v5M9 6h.01" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Os fundamentos e o texto narrativo deste legajo referem-se à atividade do cliente registrada na plataforma <strong>BetWarrior</strong>. Utilize o campo abaixo apenas para registrar, de forma complementar, eventual atividade do mesmo cliente na plataforma Dr. Bingo.</span>
+    </div>
+    <div class="field" style="margin-top:12px">
+      <label>O cliente também possui atividade na plataforma Dr. Bingo?</label>
+      <div class="radio-group">
+        <div class="radio-opt"><input type="radio" name="drb_ativ" id="drb_ativ_no" value="no" checked onchange="toggleDrBingoAtividade()"><label for="drb_ativ_no">Não</label></div>
+        <div class="radio-opt"><input type="radio" name="drb_ativ" id="drb_ativ_si" value="si" onchange="toggleDrBingoAtividade()"><label for="drb_ativ_si">Sim</label></div>
+      </div>
+    </div>
+    <div id="drbingo-ativ-fields" style="display:none">
+      <div class="grid-2">
+        <div class="field">
+          <label>Total de transações na plataforma Dr. Bingo</label>
+          <input type="text" id="drb_total_trans" placeholder="Ex: 128 ou cento e vinte e oito" onchange="updateDrBingoNarrative()">
+        </div>
+        <div class="field">
+          <label>Data de cadastro na plataforma Dr. Bingo</label>
+          <input type="date" id="drb_data_cadastro" onchange="updateDrBingoNarrative()">
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="card" id="card-narrativa" style="display:none">
     <div class="card-title">Texto Narrativo — Seção 5 do Memo</div>
     <div class="inline-alert info">
@@ -1076,7 +1103,7 @@ const ARTIGOS = {
 };
 
 const TEXTO_BASE = {
-  ros_dep_ret: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente, não tendo sido identificadas contas duplicadas, vinculadas ou indícios de utilização de terceiros para a realização de transações.
+  ros_dep_ret: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente, não tendo sido identificadas contas duplicadas, vinculadas ou indícios de utilização de terceiros para a realização de transações.
 
 Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET], evidenciando um nível elevado de transacionalidade dentro da plataforma. Em [MÊS] de [ANO], o cliente superou o nível de alerta de risco [NIVEL_RISCO], o que motivou o aprofundamento da presente análise.
 
@@ -1090,7 +1117,7 @@ Diante desse cenário, considerando a materialidade das movimentações, a ausê
 
 Em [DATA_ALERTA_INTERNO], o cliente ultrapassou os limites internos estabelecidos para monitoramento de risco. A análise correspondente foi realizada e decidiu-se pelo encaminhamento para reporte, tendo o responsável de AML sido informado. Posteriormente, em [DATA_RELATORIO], o Supervisor revisou o arquivo e aprovou o prosseguimento da revisão do cliente.`,
 
-  ros_ap_prem: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente, não tendo sido identificadas contas duplicadas, vinculadas ou indícios de utilização de terceiros para a realização de transações.
+  ros_ap_prem: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente, não tendo sido identificadas contas duplicadas, vinculadas ou indícios de utilização de terceiros para a realização de transações.
 
 No que se refere ao perfil econômico declarado, o cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos utilizados na plataforma seriam provenientes de [FONTE_FUNDOS]. Em resposta à solicitação de ampliação de atividade e origem de fundos, o cliente apresentou declaração, porém não foi possível corroborar de maneira independente que a atividade declarada corresponda efetivamente à sua atividade econômica real, tampouco foram identificadas informações adicionais em fontes públicas ou bases externas que permitissem validar a atividade profissional informada ou a capacidade econômico-financeira correspondente.
 
@@ -1106,7 +1133,7 @@ Não obstante a ausência de indícios concretos de irregularidade sob o ponto d
 
 O cliente superou o limiar interno correspondente ao nível de risco [NIVEL_RISCO]. A análise correspondente foi realizada e decidiu-se pelo encaminhamento para reporte complementar, tendo o responsável de AML sido informado. Posteriormente, em [DATA_RELATORIO], o Supervisor revisou o arquivo e aprovou o prosseguimento da revisão do cliente.`,
 
-  ros_no_resp: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente, não tendo sido identificadas contas duplicadas, vinculadas ou indícios de utilização de terceiros para a realização de transações.
+  ros_no_resp: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente, não tendo sido identificadas contas duplicadas, vinculadas ou indícios de utilização de terceiros para a realização de transações.
 
 No que se refere ao perfil econômico declarado, o cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos utilizados na plataforma seriam provenientes de [FONTE_FUNDOS]. Com o objetivo de confirmar a veracidade das informações prestadas, a equipe de Customer Support (CS) realizou tentativas de contato para solicitação de informações adicionais e documentação comprobatória relativas à atividade declarada e à origem dos recursos. Contudo, não houve resposta por parte do cliente, não sendo possível comprovar de forma independente as informações fornecidas.
 
@@ -1122,10 +1149,10 @@ Dessa forma, ainda que a movimentação não apresente indícios concretos de la
 
 A informação apresentada neste informe foi inicialmente revisada pelo analista responsável, que conduziu o processo conforme descrito nas seções precedentes. Posteriormente, o material foi avaliado pelo responsável de AML. Por fim, em [DATA_RELATORIO], o Supervisor realizou a revisão integral do expediente e aprovou a continuidade do procedimento correspondente.`,
 
-  ros_passthrough: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Observou-se um padrão de retirada de recursos logo após depósitos, sem efetivação de apostas, caracterizando possível uso da plataforma como canal de movimentação financeira (passthrough). Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, sem correspondências positivas. Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
-  ros_terceiros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Foram identificados indícios de utilização indevida da conta por pessoa distinta do titular, ou uso por intermediador que realiza apostas em nome de terceiros. Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, sem correspondências positivas. Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
-  ros_origem: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. O cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos seriam provenientes de [FONTE_FUNDOS]. Contudo, os valores aportados apresentam incompatibilidade com a capacidade econômico-financeira declarada, não sendo possível verificar a origem dos recursos. Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, sem correspondências positivas. Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
-  no_ros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente.
+  ros_passthrough: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Observou-se um padrão de retirada de recursos logo após depósitos, sem efetivação de apostas, caracterizando possível uso da plataforma como canal de movimentação financeira (passthrough). Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, sem correspondências positivas. Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
+  ros_terceiros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Foram identificados indícios de utilização indevida da conta por pessoa distinta do titular, ou uso por intermediador que realiza apostas em nome de terceiros. Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, sem correspondências positivas. Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
+  ros_origem: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. O cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos seriam provenientes de [FONTE_FUNDOS]. Contudo, os valores aportados apresentam incompatibilidade com a capacidade econômico-financeira declarada, não sendo possível verificar a origem dos recursos. Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, sem correspondências positivas. Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
+  no_ros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente.
 
 Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET].
 
@@ -1499,6 +1526,8 @@ function onTipoCasoChange() {
   texto = substituteFields(texto);
   texto = enrichNarrativeWithPdf(texto);
   ta.value = texto;
+  updateDrBingoNarrative();
+  updateReportePrevioNarrative();
 }
 
 function substituteFields(texto) {
@@ -1634,11 +1663,91 @@ function resubstituteNarrative() {
   }
 }
 
-function toggleReportePrevio(){const val=document.querySelector('input[name="rep_previo"]:checked');const show=val&&val.value==='si';document.getElementById('reporte-previo-fields').style.display=show?'block':'none';if(show&&document.querySelectorAll('.reporte-entry').length===0)addReportePrevio();}
+function toggleDrBingoAtividade(){
+  const val = document.querySelector('input[name="drb_ativ"]:checked');
+  const show = val && val.value === 'si';
+  document.getElementById('drbingo-ativ-fields').style.display = show ? 'block' : 'none';
+  if (!show) {
+    const tt = document.getElementById('drb_total_trans'); if (tt) tt.value = '';
+    const dc = document.getElementById('drb_data_cadastro'); if (dc) dc.value = '';
+  }
+  updateDrBingoNarrative();
+}
+
+function buildDrBingoSentence(){
+  const val = document.querySelector('input[name="drb_ativ"]:checked');
+  if (!val) return null;
+
+  if (val.value === 'no') {
+    return 'O cliente não registra atividade na plataforma Dr. Bingo.';
+  }
+
+  const totalRaw = (document.getElementById('drb_total_trans').value || '').trim();
+  const dataRaw = document.getElementById('drb_data_cadastro').value;
+  if (!totalRaw && !dataRaw) return null;
+
+  const totalStr = totalRaw || '[TOTAL DE TRANSAÇÕES]';
+  let dataStr = '[DATA DE CADASTRO]';
+  if (dataRaw) {
+    const [y, m, d] = dataRaw.split('-');
+    dataStr = `${d}/${m}/${y}`;
+  }
+
+  return `Adicionalmente, verificou-se que o cliente também possui atividade na plataforma Dr. Bingo, com cadastro realizado em ${dataStr} e um total de ${totalStr} transações registradas naquela plataforma.`;
+}
+
+// Injects/refreshes the Dr. Bingo sentence (either variant) as an extra paragraph
+// in the narrative, without disturbing manual edits made elsewhere in the text.
+function updateDrBingoNarrative(){
+  const ta = document.getElementById('texto_narrativo');
+  if (!ta) return;
+  const marker = /\n*(Adicionalmente, verificou-se que o cliente também possui atividade na plataforma Dr\. Bingo[^\n]*\.?|O cliente não registra atividade na plataforma Dr\. Bingo\.?)/g;
+  let texto = ta.value.replace(marker, '');
+  const sentence = buildDrBingoSentence();
+  if (sentence) {
+    texto = texto.replace(/\s+$/, '') + '\n\n' + sentence;
+  }
+  ta.value = texto;
+}
+
+function toggleReportePrevio(){const val=document.querySelector('input[name="rep_previo"]:checked');const show=val&&val.value==='si';document.getElementById('reporte-previo-fields').style.display=show?'block':'none';if(show&&document.querySelectorAll('.reporte-entry').length===0)addReportePrevio();updateReportePrevioNarrative();}
 let _rpCount=0;
-function addReportePrevio(){_rpCount++;const n=_rpCount;const list=document.getElementById('reportes-previos-list');const div=document.createElement('div');div.className='reporte-entry';div.id='rp-entry-'+n;div.innerHTML=`<div class="entry-header"><span class="entry-num">Reporte Prévio #${n}</span><button type="button" class="btn-remove-entry" onclick="removeReportePrevio(${n})" title="Remover">✕</button></div><div class="grid-2"><div class="field"><label>Número de Origem (ID interno)</label><input type="text" id="num_origem_${n}" placeholder="Ex: TGBR-154-2026"></div><div class="field"><label>Número COAF da Comunicação</label><input type="text" id="num_coaf_${n}" placeholder="Ex: 67923910"></div><div class="field"><label>Período Reportado</label><input type="text" id="periodo_rp_${n}" placeholder="Ex: Março 2026"></div></div>`;list.appendChild(div);}
-function removeReportePrevio(n){const el=document.getElementById('rp-entry-'+n);if(el)el.remove();}
+function addReportePrevio(){_rpCount++;const n=_rpCount;const list=document.getElementById('reportes-previos-list');const div=document.createElement('div');div.className='reporte-entry';div.id='rp-entry-'+n;div.innerHTML=`<div class="entry-header"><span class="entry-num">Reporte Prévio #${n}</span><button type="button" class="btn-remove-entry" onclick="removeReportePrevio(${n})" title="Remover">✕</button></div><div class="grid-2"><div class="field"><label>Número de Origem (ID interno)</label><input type="text" id="num_origem_${n}" placeholder="Ex: TGBR-154-2026" onchange="updateReportePrevioNarrative()"></div><div class="field"><label>Número COAF da Comunicação</label><input type="text" id="num_coaf_${n}" placeholder="Ex: 67923910" onchange="updateReportePrevioNarrative()"></div><div class="field"><label>Período Reportado</label><input type="text" id="periodo_rp_${n}" placeholder="Ex: Março 2026" onchange="updateReportePrevioNarrative()"></div></div>`;list.appendChild(div);updateReportePrevioNarrative();}
+function removeReportePrevio(n){const el=document.getElementById('rp-entry-'+n);if(el)el.remove();updateReportePrevioNarrative();}
 function getReportesPrevios(){const entries=[];document.querySelectorAll('.reporte-entry').forEach(el=>{const id=el.id.replace('rp-entry-','');const origem=(document.getElementById('num_origem_'+id)||{}).value||'';const coaf=(document.getElementById('num_coaf_'+id)||{}).value||'';const periodo=(document.getElementById('periodo_rp_'+id)||{}).value||'';if(origem||coaf||periodo)entries.push({origem,coaf,periodo});});return entries;}
+
+function buildReportePrevioSentence(){
+  const val = document.querySelector('input[name="rep_previo"]:checked');
+  if (!val || val.value !== 'si') return null;
+  const reports = getReportesPrevios();
+  if (!reports.length) return null;
+
+  const partes = reports.map(r => {
+    const origem = r.origem || '[NÚMERO DE ORIGEM]';
+    const coaf = r.coaf || '[NÚMERO COAF]';
+    const periodo = r.periodo || '[PERÍODO]';
+    return `Reporte Prévio nº ${origem} (Número COAF da Comunicação ${coaf}), referente ao período de ${periodo}`;
+  });
+  const lista = partes.length === 1
+    ? partes[0]
+    : partes.slice(0, -1).join('; ') + '; e ' + partes[partes.length - 1];
+
+  return `Registra-se, ainda, que o cliente já foi objeto de comunicação prévia ao COAF: ${lista}.`;
+}
+
+// Injects/refreshes the Reporte Prévio sentence as an extra paragraph in the narrative,
+// without disturbing manual edits made elsewhere in the text.
+function updateReportePrevioNarrative(){
+  const ta = document.getElementById('texto_narrativo');
+  if (!ta) return;
+  const marker = /\n*Registra-se, ainda, que o cliente já foi objeto de comunicação prévia ao COAF:[^\n]*\.?/g;
+  let texto = ta.value.replace(marker, '');
+  const sentence = buildReportePrevioSentence();
+  if (sentence) {
+    texto = texto.replace(/\s+$/, '') + '\n\n' + sentence;
+  }
+  ta.value = texto;
+}
 
 // ══════════════════════════════════════════
 // GENERATE DOCUMENTS
@@ -3103,6 +3212,12 @@ function resetForm() {
   document.getElementById('reporte-previo-fields').style.display = 'none';
   document.getElementById('reportes-previos-list').innerHTML = '';
   _rpCount = 0;
+
+  // Reset atividade em Dr. Bingo
+  const drbNo = document.getElementById('drb_ativ_no'); if (drbNo) drbNo.checked = true;
+  const drbFields = document.getElementById('drbingo-ativ-fields'); if (drbFields) drbFields.style.display = 'none';
+  const drbTotal = document.getElementById('drb_total_trans'); if (drbTotal) drbTotal.value = '';
+  const drbData = document.getElementById('drb_data_cadastro'); if (drbData) drbData.value = '';
 
   // Reset today's date fields
   const today = new Date().toISOString().split('T')[0];
