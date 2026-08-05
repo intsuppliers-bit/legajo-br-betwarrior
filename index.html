@@ -294,7 +294,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       </div>
       <div class="field">
         <label>Data de Nascimento <span class="req">*</span></label>
-        <input type="date" id="data_nasc" required>
+        <input type="date" id="data_nasc" required onchange="suggestAlerts()">
         <span class="err-msg">Campo obrigatório</span>
       </div>
     </div>
@@ -374,8 +374,8 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <span class="err-msg">Campo obrigatório</span>
       </div>
       <div class="field">
-        <label>Fonte de Fundos</label>
-        <select id="fonte_fundos" onchange="toggleOutro('fonte_fundos','fonte_fundos_outro_wrap')">
+        <label>Fonte de Fundos <span class="req">*</span></label>
+        <select id="fonte_fundos" required onchange="toggleOutro('fonte_fundos','fonte_fundos_outro_wrap')">
           <option value="">Selecionar</option>
           <option>Poupança Laboral</option>
           <option>Poupança de Aposentadoria</option>
@@ -386,6 +386,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
           <option>Herança / Doação</option>
           <option>Outro</option>
         </select>
+        <span class="err-msg">Campo obrigatório</span>
       </div>
 
       <div class="field">
@@ -479,6 +480,8 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       </div>
     </div>
   </div>
+
+  <div id="alertas-suggest-banner" style="display:none;margin-bottom:14px;padding:10px 14px;background:#F5F0FF;border:1px solid #7C3AED;border-radius:6px;font-size:12px;color:#4C1D95;line-height:1.6"></div>
 
   <div class="card">
     <div class="card-title">Alertas Disparados — CLIENTE</div>
@@ -643,43 +646,43 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       <div class="field">
         <label>OFAC</label>
         <div class="radio-group">
-          <div class="radio-opt"><input type="radio" name="r_ofac" id="ofac_n" value="Negativo" checked><label for="ofac_n">Negativo</label></div>
-          <div class="radio-opt"><input type="radio" name="r_ofac" id="ofac_p" value="Positivo"><label for="ofac_p">Positivo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_ofac" id="ofac_n" value="Negativo" checked onchange="onBuscaChange()"><label for="ofac_n">Negativo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_ofac" id="ofac_p" value="Positivo" onchange="onBuscaChange()"><label for="ofac_p">Positivo</label></div>
         </div>
       </div>
       <div class="field">
         <label>PEP Brasil</label>
         <div class="radio-group">
-          <div class="radio-opt"><input type="radio" name="r_pep" id="pep_n" value="Negativo" checked><label for="pep_n">Negativo</label></div>
-          <div class="radio-opt"><input type="radio" name="r_pep" id="pep_p" value="Positivo"><label for="pep_p">Positivo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_pep" id="pep_n" value="Negativo" checked onchange="onBuscaChange()"><label for="pep_n">Negativo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_pep" id="pep_p" value="Positivo" onchange="onBuscaChange()"><label for="pep_p">Positivo</label></div>
         </div>
       </div>
       <div class="field">
         <label>Terrorismo / Listas Internacionais</label>
         <div class="radio-group">
-          <div class="radio-opt"><input type="radio" name="r_terr" id="terr_n" value="Negativo" checked><label for="terr_n">Negativo</label></div>
-          <div class="radio-opt"><input type="radio" name="r_terr" id="terr_p" value="Positivo"><label for="terr_p">Positivo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_terr" id="terr_n" value="Negativo" checked onchange="onBuscaChange()"><label for="terr_n">Negativo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_terr" id="terr_p" value="Positivo" onchange="onBuscaChange()"><label for="terr_p">Positivo</label></div>
         </div>
       </div>
       <div class="field">
         <label>GAFI (Jurisdições Monitoradas)</label>
         <div class="radio-group">
-          <div class="radio-opt"><input type="radio" name="r_gafi" id="gafi_n" value="Negativo" checked><label for="gafi_n">Negativo</label></div>
-          <div class="radio-opt"><input type="radio" name="r_gafi" id="gafi_p" value="Positivo"><label for="gafi_p">Positivo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_gafi" id="gafi_n" value="Negativo" checked onchange="onBuscaChange()"><label for="gafi_n">Negativo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_gafi" id="gafi_p" value="Positivo" onchange="onBuscaChange()"><label for="gafi_p">Positivo</label></div>
         </div>
       </div>
       <div class="field">
         <label>RFB (Países c/ Regime Fiscal Preferencial)</label>
         <div class="radio-group">
-          <div class="radio-opt"><input type="radio" name="r_rfb" id="rfb_n" value="Negativo" checked><label for="rfb_n">Negativo</label></div>
-          <div class="radio-opt"><input type="radio" name="r_rfb" id="rfb_p" value="Positivo"><label for="rfb_p">Positivo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_rfb" id="rfb_n" value="Negativo" checked onchange="onBuscaChange()"><label for="rfb_n">Negativo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_rfb" id="rfb_p" value="Positivo" onchange="onBuscaChange()"><label for="rfb_p">Positivo</label></div>
         </div>
       </div>
       <div class="field">
         <label>Mídia Adversa</label>
         <div class="radio-group">
-          <div class="radio-opt"><input type="radio" name="r_media" id="media_n" value="Negativo" checked><label for="media_n">Negativo</label></div>
-          <div class="radio-opt"><input type="radio" name="r_media" id="media_p" value="Positivo"><label for="media_p">Positivo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_media" id="media_n" value="Negativo" checked onchange="onBuscaChange()"><label for="media_n">Negativo</label></div>
+          <div class="radio-opt"><input type="radio" name="r_media" id="media_p" value="Positivo" onchange="onBuscaChange()"><label for="media_p">Positivo</label></div>
         </div>
       </div>
     </div>
@@ -1029,7 +1032,7 @@ const ALERTAS = {
     {cod:'SA-MA-29',risk:'Medio',desc:'Cliente VIP'},
     {cod:'SA-MA-31',risk:'Alto',desc:'Clientes VIP — Risco Alto'},
     {cod:'SA-MA-32',risk:'Medio',desc:'Clientes com depósitos totais entre R$10.000–14.999 nos últimos M meses (1º sem 2026)'},
-    {cod:'SA-MA-33',risk:'Alto',desc:'Clientes com depósitos totais acima de R$10.000 nos últimos M meses (1º sem 2026)'},
+    {cod:'SA-MA-33',risk:'Alto',desc:'Clientes com depósitos totais acima de R$15.000 nos últimos M meses (1º sem 2026)'},
     {cod:'SA-MA-34',risk:'Alto',desc:'Level 1 — Jogo Responsável'},
     {cod:'SA-MA-35',risk:'Medio',desc:'Clientes com apostas totais entre R$10.000–15.000 nos últimos M meses'},
     {cod:'SA-MA-36',risk:'Medio',desc:'Clientes com prêmios totais entre R$10.000–15.000 nos últimos M meses'},
@@ -1111,7 +1114,7 @@ No que se refere ao perfil econômico declarado, o cliente informou exercer ativ
 
 De acordo com o relatório transacional consolidado, o cliente registra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL], saques totais de R$ [RET_TOTAL], apostas totais no valor de R$ [APOSTAS_TOTAL] e prêmios totais de R$ [PREMIOS_TOTAL]. A data confirmada do primeiro depósito é [DATA_PRIMEIRO_DEP].
 
-Foram realizadas buscas utilizando o nome completo do cliente nas seguintes bases: lista da OFAC, lista de Pessoas Politicamente Expostas (PEP) do Estado brasileiro, listas internacionais relacionadas ao terrorismo, lista de jurisdições monitoradas pelo GAFI e lista da Receita Federal do Brasil (RFB) relativa a países com regimes fiscais preferenciais ou privilegiados. Não foram identificadas correspondências positivas. Da mesma forma, as pesquisas de mídia adversa não retornaram informações negativas que comprometessem o cliente ou indicassem envolvimento em atividades ilícitas.
+[BUSCAS_SENTENCE]
 
 Diante desse cenário, considerando a materialidade das movimentações, a ausência de resposta à solicitação de esclarecimentos e a incompatibilidade entre o perfil econômico declarado e o comportamento transacional observado, identifica-se possível indício de incompatibilidade econômico-financeira, razão pela qual recomenda-se o reporte das operações como suspeitas (ROS), em conformidade com a Portaria SPA/MF nº 1.143/2024 e demais normativos aplicáveis.
 
@@ -1127,7 +1130,7 @@ De acordo com o relatório transacional consolidado, o cliente concentra aproxim
 
 Embora não tenham sido identificados padrões transacionais que indiquem de forma direta práticas relacionadas à lavagem de dinheiro ou financiamento do terrorismo, observa-se volume elevado de transações em apostas e prêmios. Referido volume não se mostra compatível com o perfil econômico declarado pelo cliente, evidenciando inconsistência entre a atividade informada e a movimentação financeira observada na plataforma.
 
-Foram realizadas buscas utilizando o nome completo do cliente nas seguintes bases: lista da OFAC, lista de Pessoas Politicamente Expostas (PEP) do Estado brasileiro, listas internacionais relacionadas ao terrorismo, lista de jurisdições monitoradas pelo GAFI e lista da Receita Federal do Brasil (RFB) relativa a países com regimes fiscais preferenciais ou privilegiados. Não foram identificadas correspondências positivas.
+[BUSCAS_SENTENCE]
 
 Não obstante a ausência de indícios concretos de irregularidade sob o ponto de vista transacional, a inconsistência entre o perfil econômico declarado, o volume financeiro movimentado e a impossibilidade de validação independente da atividade profissional informada configuram situação que requer comunicação, conforme os critérios estabelecidos pela normativa vigente. Dessa forma, o caso será reportado como operação suspeita (ROS), em conformidade com o disposto na Portaria SPA/MF nº 1.143/2024, em cumprimento às obrigações regulatórias do operador.
 
@@ -1139,6 +1142,8 @@ No que se refere ao perfil econômico declarado, o cliente informou exercer ativ
 
 De acordo com o relatório transacional consolidado, o cliente registra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL], apostas totais no valor de R$ [APOSTAS_TOTAL] e prêmios totais de R$ [PREMIOS_TOTAL]. A data confirmada do primeiro depósito é [DATA_PRIMEIRO_DEP].
 
+[BUSCAS_SENTENCE]
+
 No primeiro contato realizado pela equipe responsável, a conta do cliente foi suspensa de forma preventiva, em conformidade com os procedimentos internos, sendo informado que a suspensão teria caráter temporário e permaneceria vigente até o envio das informações e documentos solicitados. Ainda assim, conforme previsto na política interna, foram encaminhados avisos adicionais no terceiro, sexto e sétimo dia, reforçando a necessidade de resposta e esclarecendo que a conta permaneceria suspensa até a regularização cadastral. Decorridos os sete dias estabelecidos, não houve qualquer resposta por parte do cliente.
 
 Embora não tenham sido identificadas operações atípicas evidentes sob o ponto de vista exclusivamente transacional, a falta de colaboração do cliente, a impossibilidade de verificar a ocupação declarada e a ausência de documentação que comprove a origem lícita dos recursos enquadram-se nas hipóteses previstas pela regulamentação vigente relativas à negativa ou impossibilidade de verificação cadastral.
@@ -1149,9 +1154,9 @@ Dessa forma, ainda que a movimentação não apresente indícios concretos de la
 
 A informação apresentada neste informe foi inicialmente revisada pelo analista responsável, que conduziu o processo conforme descrito nas seções precedentes. Posteriormente, o material foi avaliado pelo responsável de AML. Por fim, em [DATA_RELATORIO], o Supervisor realizou a revisão integral do expediente e aprovou a continuidade do procedimento correspondente.`,
 
-  ros_passthrough: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Observou-se um padrão de retirada de recursos logo após depósitos, sem efetivação de apostas, caracterizando possível uso da plataforma como canal de movimentação financeira (passthrough). Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, sem correspondências positivas. Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
-  ros_terceiros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Foram identificados indícios de utilização indevida da conta por pessoa distinta do titular, ou uso por intermediador que realiza apostas em nome de terceiros. Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, sem correspondências positivas. Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
-  ros_origem: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. O cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos seriam provenientes de [FONTE_FUNDOS]. Contudo, os valores aportados apresentam incompatibilidade com a capacidade econômico-financeira declarada, não sendo possível verificar a origem dos recursos. Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, sem correspondências positivas. Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
+  ros_passthrough: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Observou-se um padrão de retirada de recursos logo após depósitos, sem efetivação de apostas, caracterizando possível uso da plataforma como canal de movimentação financeira (passthrough). [BUSCAS_SENTENCE] Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
+  ros_terceiros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. Foram identificados indícios de utilização indevida da conta por pessoa distinta do titular, ou uso por intermediador que realiza apostas em nome de terceiros. [BUSCAS_SENTENCE] Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
+  ros_origem: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET]. O cliente informou exercer atividade como [ATIVIDADE], declarando que os recursos seriam provenientes de [FONTE_FUNDOS]. Contudo, os valores aportados apresentam incompatibilidade com a capacidade econômico-financeira declarada, não sendo possível verificar a origem dos recursos. [BUSCAS_SENTENCE] Recomenda-se o reporte como ROS em conformidade com a Portaria SPA/MF nº 1.143/2024.`,
   no_ros: `O cliente [NOME COMPLETO], [IDADE] anos, utiliza a plataforma de apostas online BetWarrior e realizou seu cadastro em [DATA CADASTRO]. O acesso à conta ocorre exclusivamente por meio de endereços IP localizados em território brasileiro. Todos os métodos de pagamento associados à conta foram devidamente verificados e encontram-se registrados em nome do próprio cliente.
 
 Durante o período analisado, correspondente ao mês de [MÊS] de [ANO], o cliente realizou [QTD_DEP] depósitos, totalizando R$ [VAL_DEP], e efetuou [QTD_RET] saques, no valor total de R$ [VAL_RET].
@@ -1160,7 +1165,7 @@ No que se refere ao perfil econômico declarado, o cliente informou exercer ativ
 
 De acordo com o relatório transacional consolidado, o cliente registra aproximadamente [PCT_CASINO]% de sua atividade em jogos de cassino e [PCT_ESPORTIVO]% em apostas esportivas. Considerando o histórico completo da conta, o cliente apresenta depósitos totais de R$ [DEP_TOTAL], saques totais de R$ [RET_TOTAL], apostas totais no valor de R$ [APOSTAS_TOTAL] e prêmios totais de R$ [PREMIOS_TOTAL]. A data confirmada do primeiro depósito é [DATA_PRIMEIRO_DEP].
 
-Foram realizadas buscas nas listas da OFAC, PEP Brasil, terrorismo, GAFI e RFB, não tendo sido identificadas correspondências positivas. As pesquisas de mídia adversa tampouco retornaram informações negativas.
+[BUSCAS_SENTENCE]
 
 Após análise detalhada das operações e perfil do cliente, não foram identificados elementos suficientes que justifiquem a comunicação ao SISCOAF. O cliente não apresenta indícios concretos de práticas relacionadas à lavagem de dinheiro ou financiamento do terrorismo, sendo o seu comportamento transacional compatível com o perfil declarado.`
 };
@@ -1318,6 +1323,7 @@ async function parseMensual(input) {
       document.getElementById('mensual-fields').style.display='grid';
       showParseWarn('mensual-parsed-ok','mensual-parsed-msg','Arquivo carregado. Ajuste os valores manualmente.');
     }
+    suggestAlerts();
   } catch(e) { showParseWarn('mensual-parsed-ok','mensual-parsed-msg','Erro: '+e.message); }
 }
 
@@ -1341,6 +1347,7 @@ async function parseHistorico(input) {
       document.getElementById('historico-fields').style.display='grid';
       showParseWarn('historico-parsed-ok','historico-parsed-msg','Arquivo carregado. Ajuste os valores manualmente.');
     }
+    suggestAlerts();
   } catch(e) { showParseWarn('historico-parsed-ok','historico-parsed-msg','Erro: '+e.message); }
 }
 
@@ -1406,6 +1413,7 @@ async function parseDetalle(input) {
     const months = Object.keys(monthly).sort();
     showParseOk('detalle-parsed-ok','detalle-parsed-msg',
       `✓  ${parsed} transações lidas — ${Object.keys(monthly).length} meses com movimentação (${months[0]} → ${months[months.length-1]})`);
+    suggestAlerts();
   } catch(e) {
     showParseWarn('detalle-parsed-ok','detalle-parsed-msg','Erro: '+e.message);
     console.error(e);
@@ -1499,25 +1507,11 @@ function onTipoCasoChange() {
     lbl.style.background = chk.checked ? 'var(--or-light)' : '#fff';
   });
 
-  const artPrev = document.getElementById('artigos-preview');
-  const artLista = document.getElementById('artigos-lista');
   const cardNarr = document.getElementById('card-narrativa');
 
-  if (!tipos.length) { artPrev.style.display='none'; cardNarr.style.display='none'; return; }
+  if (!tipos.length) { document.getElementById('artigos-preview').style.display='none'; cardNarr.style.display='none'; return; }
 
-  // Collect all unique artigos from selected tipos
-  const allArts = [];
-  const seen = new Set();
-  tipos.forEach(tipo => {
-    (ARTIGOS[tipo]||[]).forEach(a => { if(!seen.has(a.cod)) { seen.add(a.cod); allArts.push(a); } });
-  });
-
-  artPrev.style.display = 'block';
-  if (!allArts.length) {
-    artLista.innerHTML = '<em style="color:var(--lgray);font-size:12px">Nenhum artigo aplicável — caso sem reporte.</em>';
-  } else {
-    artLista.innerHTML = allArts.map(a => `<div style="margin-bottom:8px"><span class="art-tag">${a.cod}</span> <span style="font-size:12px">${a.txt}</span></div>`).join('');
-  }
+  refreshArtigosPreview();
 
   // Pre-fill narrative — always update when tipo changes
   cardNarr.style.display = 'block';
@@ -1583,7 +1577,8 @@ function substituteFields(texto) {
     .replace(/\[DATA_RELATORIO\]/g, fmt('data_relatorio') || '[DATA_RELATORIO]')
     .replace(/\[DATA_INICIO\]/g, fmt('data_inicio') || '[DATA_INICIO]')
     .replace(/\[DATA_FIM\]/g, fmt('data_fim') || '[DATA_FIM]')
-    .replace(/\[DATA_ALERTA_INTERNO\]/g, fmt('data_inicio') || '[DATA_ALERTA]');
+    .replace(/\[DATA_ALERTA_INTERNO\]/g, fmt('data_inicio') || '[DATA_ALERTA]')
+    .replace(/\[BUSCAS_SENTENCE\]/g, buildBuscasSentence());
 }
 
 // Enrich narrative with PDF busca data
@@ -1710,10 +1705,10 @@ function updateDrBingoNarrative(){
   ta.value = texto;
 }
 
-function toggleReportePrevio(){const val=document.querySelector('input[name="rep_previo"]:checked');const show=val&&val.value==='si';document.getElementById('reporte-previo-fields').style.display=show?'block':'none';if(show&&document.querySelectorAll('.reporte-entry').length===0)addReportePrevio();updateReportePrevioNarrative();}
+function toggleReportePrevio(){const val=document.querySelector('input[name="rep_previo"]:checked');const show=val&&val.value==='si';document.getElementById('reporte-previo-fields').style.display=show?'block':'none';if(show&&document.querySelectorAll('.reporte-entry').length===0)addReportePrevio();updateReportePrevioNarrative();refreshArtigosPreview();}
 let _rpCount=0;
-function addReportePrevio(){_rpCount++;const n=_rpCount;const list=document.getElementById('reportes-previos-list');const div=document.createElement('div');div.className='reporte-entry';div.id='rp-entry-'+n;div.innerHTML=`<div class="entry-header"><span class="entry-num">Reporte Prévio #${n}</span><button type="button" class="btn-remove-entry" onclick="removeReportePrevio(${n})" title="Remover">✕</button></div><div class="grid-2"><div class="field"><label>Número de Origem (ID interno)</label><input type="text" id="num_origem_${n}" placeholder="Ex: TGBR-154-2026" onchange="updateReportePrevioNarrative()"></div><div class="field"><label>Número COAF da Comunicação</label><input type="text" id="num_coaf_${n}" placeholder="Ex: 67923910" onchange="updateReportePrevioNarrative()"></div><div class="field"><label>Período Reportado</label><input type="text" id="periodo_rp_${n}" placeholder="Ex: Março 2026" onchange="updateReportePrevioNarrative()"></div></div>`;list.appendChild(div);updateReportePrevioNarrative();}
-function removeReportePrevio(n){const el=document.getElementById('rp-entry-'+n);if(el)el.remove();updateReportePrevioNarrative();}
+function addReportePrevio(){_rpCount++;const n=_rpCount;const list=document.getElementById('reportes-previos-list');const div=document.createElement('div');div.className='reporte-entry';div.id='rp-entry-'+n;div.innerHTML=`<div class="entry-header"><span class="entry-num">Reporte Prévio #${n}</span><button type="button" class="btn-remove-entry" onclick="removeReportePrevio(${n})" title="Remover">✕</button></div><div class="grid-2"><div class="field"><label>Número de Origem (ID interno)</label><input type="text" id="num_origem_${n}" placeholder="Ex: TGBR-154-2026" onchange="updateReportePrevioNarrative()"></div><div class="field"><label>Número COAF da Comunicação</label><input type="text" id="num_coaf_${n}" placeholder="Ex: 67923910" onchange="updateReportePrevioNarrative()"></div><div class="field"><label>Período Reportado</label><input type="text" id="periodo_rp_${n}" placeholder="Ex: Março 2026" onchange="updateReportePrevioNarrative()"></div></div>`;list.appendChild(div);updateReportePrevioNarrative();refreshArtigosPreview();}
+function removeReportePrevio(n){const el=document.getElementById('rp-entry-'+n);if(el)el.remove();updateReportePrevioNarrative();refreshArtigosPreview();}
 function getReportesPrevios(){const entries=[];document.querySelectorAll('.reporte-entry').forEach(el=>{const id=el.id.replace('rp-entry-','');const origem=(document.getElementById('num_origem_'+id)||{}).value||'';const coaf=(document.getElementById('num_coaf_'+id)||{}).value||'';const periodo=(document.getElementById('periodo_rp_'+id)||{}).value||'';if(origem||coaf||periodo)entries.push({origem,coaf,periodo});});return entries;}
 
 function buildReportePrevioSentence(){
@@ -1747,6 +1742,192 @@ function updateReportePrevioNarrative(){
     texto = texto.replace(/\s+$/, '') + '\n\n' + sentence;
   }
   ta.value = texto;
+}
+
+// ══════════════════════════════════════════
+// BUSCAS DE RISCO — SENTENÇA DINÂMICA
+// ══════════════════════════════════════════
+// Antes, el texto de "buscas en listas" era fijo en cada template y siempre
+// decía "sem correspondências positivas", incluso si el analista marcaba
+// algún resultado como Positivo (manual o auto-detectado desde el PDF de
+// BigData). Esto genera build() según el estado real de los radios D.
+
+const BUSCA_CATS = [
+  {key:'ofac',  label:'OFAC'},
+  {key:'pep',   label:'Pessoas Politicamente Expostas (PEP) do Estado brasileiro'},
+  {key:'terr',  label:'listas internacionais relacionadas ao terrorismo'},
+  {key:'gafi',  label:'jurisdições monitoradas pelo GAFI'},
+  {key:'rfb',   label:'Receita Federal do Brasil (RFB) relativa a países com regimes fiscais preferenciais ou privilegiados'},
+];
+
+// Called from the D. Buscas de Risco radios (OFAC/PEP/terr/GAFI/RFB/mídia)
+function onBuscaChange(){
+  updateBuscasNarrative();
+  refreshArtigosPreview();
+}
+
+function buscaIsPositivo(key){
+  const el = document.getElementById(key + '_p');
+  return !!(el && el.checked);
+}
+
+function buildBuscasSentence(){
+  const basesTxt = 'lista da OFAC, lista de Pessoas Politicamente Expostas (PEP) do Estado brasileiro, listas internacionais relacionadas ao terrorismo, lista de jurisdições monitoradas pelo GAFI e lista da Receita Federal do Brasil (RFB) relativa a países com regimes fiscais preferenciais ou privilegiados';
+  const positivos = BUSCA_CATS.filter(c => buscaIsPositivo(c.key));
+
+  let texto = `Foram realizadas buscas utilizando o nome completo do cliente nas seguintes bases: ${basesTxt}.`;
+
+  if (!positivos.length) {
+    texto += ' Não foram identificadas correspondências positivas.';
+  } else {
+    const nomes = positivos.map(c => c.label).join(', ');
+    texto += ` Foi(ram) identificada(s) coincidência(s) positiva(s) em: ${nomes}. Detalhes da coincidência e da análise realizada constam no campo de observações da seção de Buscas de Risco.`;
+  }
+
+  if (buscaIsPositivo('media')) {
+    texto += ' As pesquisas de mídia adversa retornaram informações que requerem avaliação adicional, conforme detalhado no campo de observações da seção de Buscas de Risco.';
+  } else {
+    texto += ' Da mesma forma, as pesquisas de mídia adversa não retornaram informações negativas que comprometessem o cliente ou indicassem envolvimento em atividades ilícitas.';
+  }
+
+  return texto;
+}
+
+// Injects/refreshes the busca sentence as a standalone block in the narrative,
+// re-detectable regardless of which variant (positivo/negativo) was rendered.
+function updateBuscasNarrative(){
+  const ta = document.getElementById('texto_narrativo');
+  if (!ta || !ta.value) return;
+  const marker = /Foram realizadas buscas utilizando o nome completo do cliente[\s\S]*?(?:atividades ilícitas\.|seção de Buscas de Risco\.)/;
+  const sentence = buildBuscasSentence();
+  if (marker.test(ta.value)) {
+    ta.value = ta.value.replace(marker, sentence);
+  }
+}
+
+// ══════════════════════════════════════════
+// FUNDAMENTOS — ARTIGOS ADICIONAIS DINÂMICOS
+// ══════════════════════════════════════════
+// Se agregan automáticamente al listado de fundamentos (y al Word/SISCOAF)
+// cuando corresponda, además de los artigos ya vinculados al tipo de caso.
+// NOTA: los códigos internos 1410 / 1426 / 1428 fueron inferidos siguiendo
+// la misma numeración secuencial de los códigos ya confirmados en ARTIGOS
+// (Art.24-I a III = 1407-1409, Art.25-I a XIX = 1410-1428). Verificar contra
+// el catálogo interno completo antes de usar en un reporte real.
+const ARTIGO_REINCIDENCIA = {cod:'1428', txt:'Art. 25-XIX — Apostas e operações a elas associadas que envolvam: XIX - quaisquer características que sinalizem, notadamente por seu caráter não usual ou atípico, possível indício de prática de LD/FTP ou outro delito correlato. Portaria SPA/MF 1.143/2024. Aplicável em razão de o cliente já ter sido objeto de comunicação(ões) prévia(s) ao Coaf (reincidência).'};
+const ARTIGO_PEP        = {cod:'1426', txt:'Art. 25-XVII — Apostas e operações a elas associadas que envolvam: XVII - contas abertas em nome de pessoa exposta politicamente (PEP). Portaria SPA/MF 1.143/2024.'};
+const ARTIGO_LISTAS     = {cod:'1410', txt:'Art. 25-I — Apostas e operações a elas associadas que envolvam: I - pessoa envolvida ou suspeita de envolvimento em atividades tipificadas como crime de lavagem de dinheiro e crimes contra o sistema financeiro. Portaria SPA/MF 1.143/2024.'};
+
+function getFundamentosArtigos(){
+  const tipos = getSelectedTipos();
+  const seen = new Set();
+  const arts = [];
+  tipos.forEach(tipo => {
+    (ARTIGOS[tipo]||[]).forEach(a => { if(!seen.has(a.cod)){ seen.add(a.cod); arts.push(a); } });
+  });
+
+  const temRosSelecionado = tipos.some(t => t !== 'no_ros');
+  if (!temRosSelecionado) return arts; // NÃO ROS — sem fundamentos adicionais
+
+  // Reincidência — cliente com reporte(s) prévio(s) ao COAF
+  const repPrevEl = document.querySelector('input[name="rep_previo"]:checked');
+  if (repPrevEl && repPrevEl.value === 'si' && getReportesPrevios().length > 0 && !seen.has(ARTIGO_REINCIDENCIA.cod)) {
+    seen.add(ARTIGO_REINCIDENCIA.cod); arts.push(ARTIGO_REINCIDENCIA);
+  }
+  // PEP positivo
+  if (buscaIsPositivo('pep') && !seen.has(ARTIGO_PEP.cod)) {
+    seen.add(ARTIGO_PEP.cod); arts.push(ARTIGO_PEP);
+  }
+  // Coincidência positiva em listas de sanções/OFAC/GAFI/RFB
+  if ((buscaIsPositivo('ofac') || buscaIsPositivo('gafi') || buscaIsPositivo('rfb') || buscaIsPositivo('terr')) && !seen.has(ARTIGO_LISTAS.cod)) {
+    seen.add(ARTIGO_LISTAS.cod); arts.push(ARTIGO_LISTAS);
+  }
+  return arts;
+}
+
+// Refresca la vista previa de artigos en pantalla (Paso E). Se llama tanto al
+// cambiar el tipo de caso como al marcar reporte prévio o resultados de busca.
+function refreshArtigosPreview(){
+  const artPrev = document.getElementById('artigos-preview');
+  const artLista = document.getElementById('artigos-lista');
+  if (!artPrev || !artLista) return;
+  const tipos = getSelectedTipos();
+  if (!tipos.length) { artPrev.style.display = 'none'; return; }
+  const allArts = getFundamentosArtigos();
+  artPrev.style.display = 'block';
+  if (!allArts.length) {
+    artLista.innerHTML = '<em style="color:var(--lgray);font-size:12px">Nenhum artigo aplicável — caso sem reporte.</em>';
+  } else {
+    artLista.innerHTML = allArts.map(a => `<div style="margin-bottom:8px"><span class="art-tag">${a.cod}</span> <span style="font-size:12px">${a.txt}</span></div>`).join('');
+  }
+}
+
+// ══════════════════════════════════════════
+// SUGESTÃO AUTOMÁTICA DE ALERTAS
+// ══════════════════════════════════════════
+// Compara los montos ya parseados (Excel) y la edad del cliente contra los
+// umbrales conocidos de ALERTAS, y resalta (no marca automáticamente) los
+// checkboxes cuyo criterio numérico parece cumplirse, para que el analista
+// los revise y confirme. No reemplaza el criterio profesional del analista.
+function suggestAlerts(){
+  const num = id => { const el = document.getElementById(id); const n = parseFloat(el && el.value); return isNaN(n) ? 0 : n; };
+  const depTotal = num('dep_total'), retTotal = num('ret_total');
+  const apTotal = num('apostas_total'), premTotal = num('premios_total');
+
+  let idade = null;
+  const nasc = document.getElementById('data_nasc')?.value;
+  if (nasc) {
+    const d = new Date(nasc), now = new Date();
+    idade = now.getFullYear() - d.getFullYear();
+    if (now.getMonth() < d.getMonth() || (now.getMonth()===d.getMonth() && now.getDate()<d.getDate())) idade--;
+  }
+
+  // cod → función que evalúa si el criterio numérico parece cumplirse
+  const rules = {
+    'SA-MA-32': () => depTotal >= 10000 && depTotal <= 14999,
+    'SA-MA-33': () => depTotal >= 15000,
+    'SA-MA-39': () => depTotal >= 15000,
+    'SA-MA-25': () => retTotal >= 19000 && retTotal <= 61999,
+    'SA-MA-26': () => retTotal >= 62000,
+    'SA-MA-27': () => retTotal >= 10000 && retTotal <= 14999,
+    'SA-MA-28': () => retTotal >= 15000,
+    'SA-MA-35': () => apTotal >= 10000 && apTotal <= 15000,
+    'SA-MA-37': () => apTotal >= 15000,
+    'SA-MA-36': () => premTotal >= 10000 && premTotal <= 15000,
+    'SA-MA-38': () => premTotal >= 15000,
+    'SA-PT-07': () => retTotal > 0 && (depTotal / retTotal) >= 110,
+    'SA-PT-08': () => retTotal > 0 && (depTotal / retTotal) >= 130,
+    'SA-PT-09': () => retTotal > 0 && (depTotal / retTotal) >= 150,
+    'SA-MA-53': () => idade !== null && idade >= 18 && idade <= 22 && depTotal >= 3500 && depTotal <= 10000,
+    'SA-MA-54': () => idade !== null && idade >= 18 && idade <= 22 && depTotal > 10000,
+    'SA-MA-55': () => idade !== null && idade >= 18 && idade <= 22 && depTotal >= 3500 && depTotal <= 10000,
+    'SA-MA-56': () => idade !== null && idade >= 18 && idade <= 22 && depTotal > 10000,
+  };
+
+  const matched = [];
+  Object.keys(rules).forEach(cod => {
+    let hit = false;
+    try { hit = !!rules[cod](); } catch(e) { hit = false; }
+    const chk = document.getElementById('alrt_' + cod);
+    if (!chk) return;
+    const wrap = chk.closest('.alert-chk');
+    if (hit) {
+      matched.push(cod);
+      if (wrap) { wrap.style.outline = '2px solid #7C3AED'; wrap.style.borderRadius = '5px'; }
+    } else if (wrap) {
+      wrap.style.outline = '';
+    }
+  });
+
+  const banner = document.getElementById('alertas-suggest-banner');
+  if (banner) {
+    if (matched.length) {
+      banner.style.display = 'block';
+      banner.innerHTML = `💡 <strong>${matched.length} alerta(s) sugerida(s)</strong> según los montos cargados (destacados en violeta): ${matched.join(', ')}. Revisar y marcar manualmente los que correspondan — esto es solo una sugerencia, no reemplaza el análisis del analista.`;
+    } else {
+      banner.style.display = 'none';
+    }
+  }
 }
 
 // ══════════════════════════════════════════
@@ -2335,9 +2516,8 @@ async function generateWord() {
   const selectedTipos = getSelectedTipos();
   const tipoCaso = selectedTipos[0] || '';
   const isROS = selectedTipos.length > 0 && !selectedTipos.every(t => t === 'no_ros');
-  // Collect all artigos from all selected tipos
-  const artigosSeen = new Set();
-  const artigos = selectedTipos.flatMap(t => (ARTIGOS[t]||[]).filter(a => { if(artigosSeen.has(a.cod)) return false; artigosSeen.add(a.cod); return true; }));
+  // Collect all artigos from all selected tipos + fundamentos adicionales (reincidência, PEP, listas)
+  const artigos = getFundamentosArtigos();
 
   const thinBorder = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
   const borders = { top: thinBorder, bottom: thinBorder, left: thinBorder, right: thinBorder };
@@ -2871,6 +3051,7 @@ async function parseTransacoes(input) {
       `✓  ${months.length} meses (${months[0]} → ${months[months.length-1]})${periLabel}  |  Dep total ${fmtBRLs(totalDep)}  |  Ret total ${fmtBRLs(totalRet)}`);
 
     resubstituteNarrative();
+    suggestAlerts();
   } catch(e) {
     showParseWarn('transacoes-parsed-ok','transacoes-parsed-msg','Erro: ' + e.message);
     console.error(e);
@@ -3140,6 +3321,7 @@ function applyBuscaToForm(data) {
   // Enrich narrative with occupation/income data
   window.pdfBuscaData = data;
   resubstituteNarrative();
+  onBuscaChange();
 }
 
 // ══════════════════════════════════════════
@@ -3165,6 +3347,10 @@ function resetForm() {
 
   // Uncheck all alert checkboxes (alertas do sistema)
   document.querySelectorAll('.alert-chk input[type="checkbox"]').forEach(el => el.checked = false);
+  // Clear alert auto-suggestion highlights/banner
+  document.querySelectorAll('.alert-chk').forEach(el => el.style.outline = '');
+  const suggestBanner = document.getElementById('alertas-suggest-banner');
+  if (suggestBanner) { suggestBanner.style.display = 'none'; suggestBanner.innerHTML = ''; }
 
   // Uncheck tipo caso checkboxes and reset their visual state
   document.querySelectorAll('#tipo_caso_checks input[type="checkbox"]').forEach(el => {
