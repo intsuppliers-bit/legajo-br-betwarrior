@@ -234,17 +234,15 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     <div class="progress-track" id="progressTrack">
       <div class="prog-step active" id="ps-0"><div class="prog-dot">A</div><span class="prog-label">Cliente</span></div>
       <div class="prog-line"></div>
-      <div class="prog-step" id="ps-1"><div class="prog-dot">B</div><span class="prog-label">Alertas</span></div>
+      <div class="prog-step" id="ps-1"><div class="prog-dot">B</div><span class="prog-label">Transações</span></div>
       <div class="prog-line"></div>
-      <div class="prog-step" id="ps-2"><div class="prog-dot">C</div><span class="prog-label">Transações</span></div>
+      <div class="prog-step" id="ps-2"><div class="prog-dot">C</div><span class="prog-label">Buscas</span></div>
       <div class="prog-line"></div>
-      <div class="prog-step" id="ps-3"><div class="prog-dot">D</div><span class="prog-label">Buscas</span></div>
+      <div class="prog-step" id="ps-3"><div class="prog-dot">D</div><span class="prog-label">Fundamentos</span></div>
       <div class="prog-line"></div>
-      <div class="prog-step" id="ps-4"><div class="prog-dot">E</div><span class="prog-label">Fundamentos</span></div>
+      <div class="prog-step" id="ps-4"><div class="prog-dot">E</div><span class="prog-label">Revisão</span></div>
       <div class="prog-line"></div>
-      <div class="prog-step" id="ps-5"><div class="prog-dot">F</div><span class="prog-label">Revisão</span></div>
-      <div class="prog-line"></div>
-      <div class="prog-step" id="ps-6"><div class="prog-dot">G</div><span class="prog-label">Documentos</span></div>
+      <div class="prog-step" id="ps-5"><div class="prog-dot">F</div><span class="prog-label">Documentos</span></div>
     </div>
   </div>
 </header>
@@ -434,7 +432,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
   <div class="nav-row">
     <div></div>
     <div style="display:flex;align-items:center;gap:12px">
-      <span class="step-counter">Passo <span>1</span> de 7</span>
+      <span class="step-counter">Passo <span>1</span> de 6</span>
       <button class="btn-next" onclick="nextStep(0)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
@@ -445,8 +443,8 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
   <div class="step-header">
     <div class="step-letter">B</div>
     <div class="step-info">
-      <h2>Período e Alertas do Sistema</h2>
-      <p>Selecione o período analisado e marque todos os alertas que o cliente disparou</p>
+      <h2>Período, Transações e Alertas</h2>
+      <p>Selecione o período, carregue o arquivo transacional e marque os alertas que o cliente disparou</p>
     </div>
   </div>
 
@@ -478,55 +476,6 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <label>Forma de Pagamento</label>
         <input type="text" id="forma_pagamento" value="XP_W_BankTransfer" placeholder="XP_W_BankTransfer">
       </div>
-    </div>
-  </div>
-
-  <div id="alertas-suggest-banner" style="display:none;margin-bottom:14px;padding:10px 14px;background:#F5F0FF;border:1px solid #7C3AED;border-radius:6px;font-size:12px;color:#4C1D95;line-height:1.6"></div>
-
-  <div class="card">
-    <div class="card-title">Alertas Disparados — CLIENTE</div>
-    <div class="alert-group">
-      <div class="alert-items" id="alertas-cl"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Alertas Disparados — OPERATORIA</div>
-    <div class="alert-group">
-      <div class="alert-items" id="alertas-op"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Alertas Disparados — TRANSACCIONAL</div>
-    <div class="alert-group">
-      <div class="alert-items" id="alertas-tr"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Alertas Disparados — VERIFICAÇÃO</div>
-    <div class="alert-group">
-      <div class="alert-items" id="alertas-ve"></div>
-    </div>
-  </div>
-
-  <div class="nav-row">
-    <button class="btn-back" onclick="prevStep(1)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
-    <div style="display:flex;align-items:center;gap:12px">
-      <span class="step-counter">Passo <span>2</span> de 7</span>
-      <button class="btn-next" onclick="nextStep(1)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ STEP 2 — C. Dados Transacionais ══ -->
-<div class="step-panel" id="step-2">
-  <div class="step-header">
-    <div class="step-letter">C</div>
-    <div class="step-info">
-      <h2>Dados Transacionais</h2>
-      <p>Carregue os três relatórios do BI — os dados serão extraídos automaticamente</p>
     </div>
   </div>
 
@@ -574,19 +523,19 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
       </div>
       <div class="field">
         <label>Depósitos Totais (R$)</label>
-        <input type="number" id="dep_total" placeholder="0.00" min="0" step="0.01">
+        <input type="number" id="dep_total" placeholder="0.00" min="0" step="0.01" onchange="suggestAlerts()">
       </div>
       <div class="field">
         <label>Retiradas Totais (R$)</label>
-        <input type="number" id="ret_total" placeholder="0.00" min="0" step="0.01">
+        <input type="number" id="ret_total" placeholder="0.00" min="0" step="0.01" onchange="suggestAlerts()">
       </div>
       <div class="field">
         <label>Apostas Totais (R$)</label>
-        <input type="number" id="apostas_total" placeholder="0.00" min="0" step="0.01">
+        <input type="number" id="apostas_total" placeholder="0.00" min="0" step="0.01" onchange="suggestAlerts()">
       </div>
       <div class="field">
         <label>Prêmios Totais (R$)</label>
-        <input type="number" id="premios_total" placeholder="0.00" min="0" step="0.01">
+        <input type="number" id="premios_total" placeholder="0.00" min="0" step="0.01" onchange="suggestAlerts()">
       </div>
     </div>
     <!-- Monthly table auto-generated -->
@@ -621,19 +570,49 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     </div>
   </div>
 
+  <div id="alertas-suggest-banner" style="display:none;margin-bottom:14px;padding:10px 14px;background:#F5F0FF;border:1px solid #7C3AED;border-radius:6px;font-size:12px;color:#4C1D95;line-height:1.6"></div>
+
+  <div class="card">
+    <div class="card-title">Alertas Disparados — CLIENTE</div>
+    <div class="alert-group">
+      <div class="alert-items" id="alertas-cl"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Alertas Disparados — OPERATORIA</div>
+    <div class="alert-group">
+      <div class="alert-items" id="alertas-op"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Alertas Disparados — TRANSACCIONAL</div>
+    <div class="alert-group">
+      <div class="alert-items" id="alertas-tr"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Alertas Disparados — VERIFICAÇÃO</div>
+    <div class="alert-group">
+      <div class="alert-items" id="alertas-ve"></div>
+    </div>
+  </div>
+
   <div class="nav-row">
-    <button class="btn-back" onclick="prevStep(2)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
+    <button class="btn-back" onclick="prevStep(1)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
     <div style="display:flex;align-items:center;gap:12px">
-      <span class="step-counter">Passo <span>3</span> de 7</span>
-      <button class="btn-next" onclick="nextStep(2)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <span class="step-counter">Passo <span>2</span> de 6</span>
+      <button class="btn-next" onclick="nextStep(1)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
 </div>
 
-<!-- ══ STEP 3 — D. Buscas de Risco ══ -->
-<div class="step-panel" id="step-3">
+<!-- ══ STEP 2 — D. Buscas de Risco ══ -->
+<div class="step-panel" id="step-2">
   <div class="step-header">
-    <div class="step-letter">D</div>
+    <div class="step-letter">C</div>
     <div class="step-info">
       <h2>Buscas de Risco</h2>
       <p>Resultado das consultas em listas e bases externas</p>
@@ -726,21 +705,39 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
   </div>
 
   <div class="nav-row">
-    <button class="btn-back" onclick="prevStep(3)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
+    <button class="btn-back" onclick="prevStep(2)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
     <div style="display:flex;align-items:center;gap:12px">
-      <span class="step-counter">Passo <span>4</span> de 7</span>
-      <button class="btn-next" onclick="nextStep(3)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <span class="step-counter">Passo <span>3</span> de 6</span>
+      <button class="btn-next" onclick="nextStep(2)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
 </div>
 
-<!-- ══ STEP 4 — E. Fundamentos ══ -->
-<div class="step-panel" id="step-4">
+<!-- ══ STEP 3 — E. Fundamentos ══ -->
+<div class="step-panel" id="step-3">
   <div class="step-header">
-    <div class="step-letter">E</div>
+    <div class="step-letter">D</div>
     <div class="step-info">
       <h2>Fundamentos e Análise</h2>
       <p>Tipo de caso, artigos da Portaria e texto narrativo do relatório</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Reporte Prévio ao SISCOAF / COAF</div>
+    <div class="field">
+      <label>Este cliente já foi reportado anteriormente?</label>
+      <div class="radio-group">
+        <div class="radio-opt"><input type="radio" name="rep_previo" id="rp_no" value="no" checked onchange="toggleReportePrevio()"><label for="rp_no">Não</label></div>
+        <div class="radio-opt"><input type="radio" name="rep_previo" id="rp_si" value="si" onchange="toggleReportePrevio()"><label for="rp_si">Sim</label></div>
+      </div>
+    </div>
+    <div id="reporte-previo-fields">
+      <div id="reportes-previos-list"></div>
+      <button type="button" class="btn-add-entry" onclick="addReportePrevio()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Adicionar reporte prévio
+      </button>
     </div>
   </div>
 
@@ -829,37 +826,19 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">Reporte Prévio ao SISCOAF / COAF</div>
-    <div class="field">
-      <label>Este cliente já foi reportado anteriormente?</label>
-      <div class="radio-group">
-        <div class="radio-opt"><input type="radio" name="rep_previo" id="rp_no" value="no" checked onchange="toggleReportePrevio()"><label for="rp_no">Não</label></div>
-        <div class="radio-opt"><input type="radio" name="rep_previo" id="rp_si" value="si" onchange="toggleReportePrevio()"><label for="rp_si">Sim</label></div>
-      </div>
-    </div>
-    <div id="reporte-previo-fields">
-      <div id="reportes-previos-list"></div>
-      <button type="button" class="btn-add-entry" onclick="addReportePrevio()">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        Adicionar reporte prévio
-      </button>
-    </div>
-  </div>
-
   <div class="nav-row">
-    <button class="btn-back" onclick="prevStep(4)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
+    <button class="btn-back" onclick="prevStep(3)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
     <div style="display:flex;align-items:center;gap:12px">
-      <span class="step-counter">Passo <span>5</span> de 7</span>
-      <button class="btn-next" onclick="nextStep(4)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <span class="step-counter">Passo <span>4</span> de 6</span>
+      <button class="btn-next" onclick="nextStep(3)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
 </div>
 
-<!-- ══ STEP 5 — F. Revisão e Aprovação ══ -->
-<div class="step-panel" id="step-5">
+<!-- ══ STEP 4 — F. Revisão e Aprovação ══ -->
+<div class="step-panel" id="step-4">
   <div class="step-header">
-    <div class="step-letter">F</div>
+    <div class="step-letter">E</div>
     <div class="step-info">
       <h2>Revisão e Aprovação</h2>
       <p>Responsáveis e datas do procedimento interno</p>
@@ -897,18 +876,18 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
   </div>
 
   <div class="nav-row">
-    <button class="btn-back" onclick="prevStep(5)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
+    <button class="btn-back" onclick="prevStep(4)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
     <div style="display:flex;align-items:center;gap:12px">
-      <span class="step-counter">Passo <span>6</span> de 7</span>
-      <button class="btn-next" onclick="nextStep(5)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <span class="step-counter">Passo <span>5</span> de 6</span>
+      <button class="btn-next" onclick="nextStep(4)">Continuar <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
 </div>
 
-<!-- ══ STEP 6 — G. Documentos ══ -->
-<div class="step-panel" id="step-6">
+<!-- ══ STEP 5 — G. Documentos ══ -->
+<div class="step-panel" id="step-5">
   <div class="step-header">
-    <div class="step-letter">G</div>
+    <div class="step-letter">F</div>
     <div class="step-info">
       <h2>Documentos do Cliente</h2>
       <p>Carregue todos os arquivos que devem ser incluídos e anexados ao PDF final</p>
@@ -966,9 +945,9 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
   </div>
 
   <div class="nav-row">
-    <button class="btn-back" onclick="prevStep(6)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
+    <button class="btn-back" onclick="prevStep(5)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Voltar</button>
     <div style="display:flex;align-items:center;gap:12px">
-      <span class="step-counter">Passo <span>7</span> de 7</span>
+      <span class="step-counter">Passo <span>6</span> de 6</span>
       <button class="btn-generate" onclick="generateDocuments()">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3v9M7 9l3 3 3-3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="14" width="14" height="3" rx="1" stroke="white" stroke-width="1.8"/></svg>
         Gerar Legajo + Memo
@@ -1174,7 +1153,7 @@ Após análise detalhada das operações e perfil do cliente, não foram identif
 // NAVIGATION
 // ══════════════════════════════════════════
 let currentStep = 0;
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
 
 function showStep(n) {
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
@@ -1225,8 +1204,8 @@ function validateStep(step) {
       if (field) field.classList.remove('show-err');
     }, { once: true });
   });
-  // Step 4 special: require at least one tipo_caso checked
-  if (step === 4) {
+  // Step 3 special: require at least one tipo_caso checked
+  if (step === 3) {
     const tipos = getSelectedTipos ? getSelectedTipos() : [];
     if (!tipos.length) {
       const tipoCasoEl = document.getElementById('tipo_caso_checks');
@@ -1707,7 +1686,7 @@ function updateDrBingoNarrative(){
 
 function toggleReportePrevio(){const val=document.querySelector('input[name="rep_previo"]:checked');const show=val&&val.value==='si';document.getElementById('reporte-previo-fields').style.display=show?'block':'none';if(show&&document.querySelectorAll('.reporte-entry').length===0)addReportePrevio();updateReportePrevioNarrative();refreshArtigosPreview();}
 let _rpCount=0;
-function addReportePrevio(){_rpCount++;const n=_rpCount;const list=document.getElementById('reportes-previos-list');const div=document.createElement('div');div.className='reporte-entry';div.id='rp-entry-'+n;div.innerHTML=`<div class="entry-header"><span class="entry-num">Reporte Prévio #${n}</span><button type="button" class="btn-remove-entry" onclick="removeReportePrevio(${n})" title="Remover">✕</button></div><div class="grid-2"><div class="field"><label>Número de Origem (ID interno)</label><input type="text" id="num_origem_${n}" placeholder="Ex: TGBR-154-2026" onchange="updateReportePrevioNarrative()"></div><div class="field"><label>Número COAF da Comunicação</label><input type="text" id="num_coaf_${n}" placeholder="Ex: 67923910" onchange="updateReportePrevioNarrative()"></div><div class="field"><label>Período Reportado</label><input type="text" id="periodo_rp_${n}" placeholder="Ex: Março 2026" onchange="updateReportePrevioNarrative()"></div></div>`;list.appendChild(div);updateReportePrevioNarrative();refreshArtigosPreview();}
+function addReportePrevio(){_rpCount++;const n=_rpCount;const list=document.getElementById('reportes-previos-list');const div=document.createElement('div');div.className='reporte-entry';div.id='rp-entry-'+n;div.innerHTML=`<div class="entry-header"><span class="entry-num">Reporte Prévio #${n}</span><button type="button" class="btn-remove-entry" onclick="removeReportePrevio(${n})" title="Remover">✕</button></div><div class="grid-2"><div class="field"><label>Número de Origem (ID interno)</label><input type="text" id="num_origem_${n}" placeholder="Ex: TGBR-154-2026" onchange="updateReportePrevioNarrative();refreshArtigosPreview()"></div><div class="field"><label>Número COAF da Comunicação</label><input type="text" id="num_coaf_${n}" placeholder="Ex: 67923910" onchange="updateReportePrevioNarrative();refreshArtigosPreview()"></div><div class="field"><label>Período Reportado</label><input type="text" id="periodo_rp_${n}" placeholder="Ex: Março 2026" onchange="updateReportePrevioNarrative();refreshArtigosPreview()"></div></div>`;list.appendChild(div);updateReportePrevioNarrative();refreshArtigosPreview();}
 function removeReportePrevio(n){const el=document.getElementById('rp-entry-'+n);if(el)el.remove();updateReportePrevioNarrative();refreshArtigosPreview();}
 function getReportesPrevios(){const entries=[];document.querySelectorAll('.reporte-entry').forEach(el=>{const id=el.id.replace('rp-entry-','');const origem=(document.getElementById('num_origem_'+id)||{}).value||'';const coaf=(document.getElementById('num_coaf_'+id)||{}).value||'';const periodo=(document.getElementById('periodo_rp_'+id)||{}).value||'';if(origem||coaf||periodo)entries.push({origem,coaf,periodo});});return entries;}
 
@@ -1818,6 +1797,20 @@ const ARTIGO_REINCIDENCIA = {cod:'1428', txt:'Art. 25-XIX — Apostas e operaç�
 const ARTIGO_PEP        = {cod:'1426', txt:'Art. 25-XVII — Apostas e operações a elas associadas que envolvam: XVII - contas abertas em nome de pessoa exposta politicamente (PEP). Portaria SPA/MF 1.143/2024.'};
 const ARTIGO_LISTAS     = {cod:'1410', txt:'Art. 25-I — Apostas e operações a elas associadas que envolvam: I - pessoa envolvida ou suspeita de envolvimento em atividades tipificadas como crime de lavagem de dinheiro e crimes contra o sistema financeiro. Portaria SPA/MF 1.143/2024.'};
 
+// Texto factual sobre reporte(s) prévio(s) para o item 6 (Fundamentos) do memo.
+// Se Não: deixa constância de que não há reportes anteriores.
+// Se Sim: lista os dados de TODOS os reportes cadastrados (não só o primeiro).
+function buildReportePrevioFundamentoText(){
+  const repPrevEl = document.querySelector('input[name="rep_previo"]:checked');
+  const isSi = repPrevEl && repPrevEl.value === 'si';
+  const entries = getReportesPrevios();
+  if (!isSi || !entries.length) {
+    return 'Reporte Prévio ao Coaf: não foram identificados reportes ou comunicações anteriores ao Coaf relativos a este cliente.';
+  }
+  const lista = entries.map((r,i) => `(${i+1}) Comunicação de Origem nº ${r.origem||'não informado'}, Protocolo Coaf nº ${r.coaf||'não informado'}, referente ao período de ${r.periodo||'não informado'}`).join('; ');
+  return `Reporte Prévio ao Coaf: o cliente já foi objeto de ${entries.length > 1 ? entries.length + ' comunicações anteriores' : 'uma comunicação anterior'} ao Coaf: ${lista}.`;
+}
+
 function getFundamentosArtigos(){
   const tipos = getSelectedTipos();
   const seen = new Set();
@@ -1855,11 +1848,16 @@ function refreshArtigosPreview(){
   if (!tipos.length) { artPrev.style.display = 'none'; return; }
   const allArts = getFundamentosArtigos();
   artPrev.style.display = 'block';
+  let html = '';
   if (!allArts.length) {
-    artLista.innerHTML = '<em style="color:var(--lgray);font-size:12px">Nenhum artigo aplicável — caso sem reporte.</em>';
+    html += '<em style="color:var(--lgray);font-size:12px">Nenhum artigo aplicável — caso sem reporte.</em>';
   } else {
-    artLista.innerHTML = allArts.map(a => `<div style="margin-bottom:8px"><span class="art-tag">${a.cod}</span> <span style="font-size:12px">${a.txt}</span></div>`).join('');
+    html += allArts.map(a => `<div style="margin-bottom:8px"><span class="art-tag">${a.cod}</span> <span style="font-size:12px">${a.txt}</span></div>`).join('');
   }
+  if (tipos.some(t => t !== 'no_ros')) {
+    html += `<div style="margin-top:6px;padding-top:8px;border-top:1px dashed var(--field-bdr);font-size:12px;color:var(--ink2)">${buildReportePrevioFundamentoText()}</div>`;
+  }
+  artLista.innerHTML = html;
 }
 
 // ══════════════════════════════════════════
@@ -1979,7 +1977,7 @@ async function generateDocuments() {
       const a = document.createElement('a'); a.href=wordUrl; a.download=`${idGrupo}_${clientName}_MEMO_SISCOAF.docx`; a.click();
     };
 
-    document.getElementById('step-6').style.display = 'none';
+    document.getElementById('step-5').style.display = 'none';
     document.getElementById('resultScreen').style.display = 'block';
     window.scrollTo({top:0,behavior:'smooth'});
   } catch(err) {
@@ -2571,7 +2569,8 @@ async function generateWord() {
   }
 
   // Artigos text — one per line
-  const artigosText = artigos.map(a => a.cod + ' ' + a.txt).join('\n\n');
+  const artigosText = (artigos.map(a => a.cod + ' ' + a.txt).join('\n\n')) +
+    (isROS ? '\n\n' + buildReportePrevioFundamentoText() : '');
 
   // Reporte previo
   const repPrev = document.querySelector('input[name="rep_previo"]:checked');
@@ -3418,7 +3417,7 @@ function resetForm() {
 
   // Hide result, show step 6, go to step 0
   document.getElementById('resultScreen').style.display = 'none';
-  document.getElementById('step-6').style.display = '';
+  document.getElementById('step-5').style.display = '';
   showStep(0);
 }
 
