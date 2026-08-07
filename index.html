@@ -2401,17 +2401,24 @@ async function generatePDF() {
     sf(7,true,255,255,255);
     doc.text('Dados Extraídos — BigData Corp',ML+3,y+4.5);
     y+=8;
+    const sanctions = bd.sanctions || {};
+    const sanctCount = Object.values(sanctions).filter(v => v !== null).length;
+    const sanctText = sanctCount > 0
+      ? Object.entries(sanctions).filter(([,v]) => v !== null).map(([s,r]) => `${s} (match ${r}%)`).join(', ')
+      : 'Sem coincidências relevantes';
     const bdRows=[
       ['Situação Empregatícia', bd.employed==='Yes'?'Empregado':bd.employed==='No'?'Não empregado':'—'],
       bd.currentEmployer ? ['Empregador Atual', bd.currentEmployer] : null,
+      bd.currentSector ? ['Setor', bd.currentSector] : null,
       ['Renda Individual Estimada', bd.incomeRange||'—'],
       ['Renda Familiar Total', bd.familyIncome||'—'],
       ['Patrimônio Total Estimado', bd.totalAssets||'—'],
       ['Fonte Principal de Renda', bd.mainIncomeSource||'—'],
+      bd.companyOwner ? ['Proprietário de Empresa', bd.companyOwner==='Yes'?'Sim':bd.companyOwner==='No'?'Não':'—'] : null,
       ['Score de Risco Financeiro', bd.financialRiskLevel ? `Nível ${bd.financialRiskLevel}${bd.financialRiskScore?' ('+bd.financialRiskScore+' pts)':''}` : '—'],
       ['Ocorrências em Cobranças', bd.collections||'0'],
       ['PEP', bd.isPep==='Yes'?'POSITIVO':bd.isPep==='No'?'Negativo':'—'],
-      ['Sancionado', bd.currentlySanctioned==='Yes'?'SIM':bd.currentlySanctioned==='No'?'Não':'—'],
+      ['Coincidências em Listas', sanctText],
     ].filter(Boolean);
     bdRows.forEach((r,i)=>{
       check(6);
