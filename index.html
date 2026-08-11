@@ -2917,6 +2917,30 @@ function fillClientFields(c) {
       if (parts.length >= 2) set('localidade', parts[parts.length - 2]);
     }
   }
+  // Localidade/Cidade e Estado (UF) — preferem os campos diretos da base (Municipio/Estado)
+  // por cima do que se conseguiu adivinhar do endereço em texto livre acima.
+  if (c.city) set('localidade', c.city);
+  if (c.uf) setSelect('estado_uf', c.uf.toUpperCase());
+
+  // Estado Civil — a base traz "Solteiro(a)", "Casado(a)" etc.; o formulário usa
+  // "Solteiro", "Casado" sem o sufixo, então tiramos "(a)"/"(o)" antes de comparar.
+  if (c.civilStatus) {
+    const clean = c.civilStatus.replace(/\(.*?\)/g, '').trim();
+    const el = document.getElementById('estado_civil');
+    if (el) {
+      let matched = false;
+      for (let opt of el.options) {
+        if (!opt.value) continue;
+        if (opt.value.toLowerCase() === clean.toLowerCase()) { el.value = opt.value; matched = true; break; }
+      }
+      if (!matched) {
+        for (let opt of el.options) {
+          if (!opt.value) continue;
+          if (clean.toLowerCase().includes(opt.value.toLowerCase()) || opt.value.toLowerCase().includes(clean.toLowerCase())) { el.value = opt.value; break; }
+        }
+      }
+    }
+  }
 
   // Nationality
   if (c.nationality === 'BR' || c.nationality === 'Brasil' || c.nationality === 'Brazil') {
@@ -3464,6 +3488,8 @@ function aplicarPrefillBandeja(){
   set('id_grupo', data.idGrupo);
   set('id_interno', data.idInterno);
   set('nivel_risco', data.nivelRisco);
+  set('mes_ref', data.mes);
+  set('ano_ref', data.ano);
 
   // Identidade e KYC do cliente — reusa a mesma função do botão "Buscar",
   // porque a Bandeja já tem exatamente os mesmos campos da base de clientes.
