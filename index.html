@@ -321,6 +321,14 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;font-
         <label>País de Residência</label>
         <input type="text" id="pais_residencia" value="Brasil" placeholder="Brasil">
       </div>
+      <div class="field">
+        <label>Status VIP</label>
+        <select id="vip_status">
+          <option value="">Selecionar</option>
+          <option>N/A</option><option>BRONZE</option><option>SILVER</option>
+          <option>GOLD</option><option>PVIP</option><option>DIAMOND</option><option>EXVIP</option>
+        </select>
+      </div>
       <div class="field col-2">
         <label>Endereço</label>
         <input type="text" id="endereco" placeholder="Rua, número, complemento">
@@ -2279,6 +2287,7 @@ async function generatePDF() {
   row2('CPF',v('cpf'),'F. Nascimento',fmtDate('data_nasc'));
   row2('Nacionalidade',v('nacionalidade')||'Brasil','País Residência',v('pais_residencia')||'Brasil');
   row2('Estado Civil',v('estado_civil')||'–','Estado (UF)',v('estado_uf'));
+  row2('Localidade',v('localidade')||'–','Status VIP',v('vip_status')||'–');
   const endParts=[v('endereco'),v('localidade'),v('estado_uf')?v('estado_uf'):null,v('cep')?'CEP '+v('cep'):null].filter(Boolean);
   rowFull('Endereço', endParts.join(', ')||'–');
   row2('Atividade',vOcup()||'–','Fonte de Fundos',vFonte()||'–');
@@ -2779,6 +2788,10 @@ async function loadDatabase(input) {
       s: String(r['Account Active'] || r['Account Status'] || '').trim(),
       r: normalizeDate(r['Registration Date'] || r['registration_date']),
       t: normalizeDate(r['FTD Date'] || r['ftd_date']),
+      cs: String(r['Estado_Civil'] || r['estado_civil'] || '').trim(),
+      ct: String(r['Municipio'] || r['municipio'] || '').trim(),
+      uf: String(r['Estado'] || r['estado'] || '').trim(),
+      v: String(r['VIP Status'] || r['vip_status'] || '').trim(),
     }));
 
     setDbStatus('loading', `${clientDB.length.toLocaleString('pt-BR')} registros — salvando...`);
@@ -2817,6 +2830,7 @@ function expandClient(c) {
     partyId: c.i, cpf: c.c, firstName: c.f, lastName: c.l,
     occupation: c.o, birthdate: c.b, isPep: c.p, nationality: c.n,
     address: c.a, accountStatus: c.s, registrationDate: c.r, ftdDate: c.t,
+    civilStatus: c.cs, city: c.ct, uf: c.uf, vipStatus: c.v,
   };
 }
 
@@ -2985,6 +2999,11 @@ function fillClientFields(c) {
   // PEP
   if (c.isPep && c.isPep.toLowerCase() !== 'si' && c.isPep.toLowerCase() !== 'no') {
     // keep as-is
+  }
+
+  // Status VIP — a base traz BRONZE/SILVER/GOLD/PVIP/DIAMOND/EXVIP/N/A
+  if (c.vipStatus) {
+    setSelect('vip_status', c.vipStatus.toUpperCase());
   }
 
   // Show banner
